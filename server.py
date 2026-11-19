@@ -1,9 +1,10 @@
 """
-FastAPI backend powered by MIT-SPARK/Spark-DSG.
+FastAPI backend powered by MIT-SPARK/Spark-DSG (Full 5-Layer DSG + Mesh).
 
-Loads a live spark_dsg.DynamicSceneGraph, supports dynamic topological mutations
-(opening/closing doors via G.insert_edge / G.remove_edge), hierarchical planning
-(Rooms macro-plan + Places free-space Dijkstra), and semantic querying.
+Loads a live spark_dsg.DynamicSceneGraph with:
+- L5 BUILDINGS, L4 ROOMS, L3 PLACES, L2 OBJECTS, L1 SEGMENTS + G.mesh
+Supports dynamic topological mutations (G.insert_edge / G.remove_edge),
+hierarchical planning, L1->L2 segment-to-object inspection, and semantic querying.
 """
 
 from __future__ import annotations
@@ -26,6 +27,7 @@ from build_scene_graph import (
     OBJECT_SPECS,
     PLACE_SPECS,
     ROOM_SPECS,
+    SEGMENT_SPECS,
     WALLS,
     make_edge_attr,
     save_demo_graph,
@@ -37,6 +39,7 @@ STATIC_DIR = BASE_DIR / "static"
 DSG_PATH = DATA_DIR / "smart_lab_dsg.json"
 
 LAYER_NAMES = {
+    1: "SEGMENTS",
     2: "OBJECTS",
     3: "PLACES",
     4: "ROOMS",
@@ -44,16 +47,17 @@ LAYER_NAMES = {
 }
 
 LAYER_NAMES_ZH = {
+    1: "几何片段层 (Segments)",
     2: "物体层 (Objects)",
     3: "自由空间层 (Places)",
     4: "房间概念层 (Rooms)",
     5: "建筑概念层 (Buildings)",
 }
 
-# Bilingual lookup maps
 ROOM_META = {f"R({r['idx']})": r for r in ROOM_SPECS}
 PLACE_META = {f"p({p['idx']})": p for p in PLACE_SPECS}
 OBJECT_META = {f"O({o['idx']})": o for o in OBJECT_SPECS}
+SEGMENT_META = {f"s({s['idx']})": s for s in SEGMENT_SPECS}
 
 
 class SceneGraphService:
@@ -64,6 +68,9 @@ class SceneGraphService:
 
     def reset(self) -> None:
         self.G: dsg.DynamicSceneGraph = dsg.DynamicSceneGraph.load(str(DSG_PATH))
+        if not self.G.has_layer(dsg.DsgLayers.SEGMENTS):
+            save_demo_graph(DATA_DIR)
+            self.G = dsg.DynamicSceneGraph.load(str(DSG_PATH))
         self.doors: list[dict[str, Any]] = copy.deepcopy(DOOR_SPECS)
 
     def _sym_str(self, node_id: int) -> str:
@@ -74,13 +81,9 @@ class SceneGraphService:
         return int(layer_obj.layer) if hasattr(layer_obj, "layer") else int(layer_obj)
 
     def _parse_symbol(self, sym_str: str) -> dsg.NodeSymbol:
-        # Format like "O(8)", "p(13)", "R(3)", "B(0)"
         s = sym_str.strip()
         if "(" in s and s.endswith(")"):
-            cat = s[0]
-            idx = int(s[2:-1])
-            return dsg.NodeSymbol(cat, idx)
-        # Also allow "O8", "p13", "R3", "B0"
+            return dsg.NodeSymbol(s[0], int(s[2:-1]))
         return dsg.NodeSymbol(s[0], int(s[1:]))
 
     def _node_label_zh(self, sym: str, fallback: str) -> str:
@@ -92,9 +95,11 @@ class SceneGraphService:
             return PLACE_META[sym]["desc"]
         if sym in OBJECT_META:
             return OBJECT_META[sym]["name_zh"]
+        if sym in SEGMENT_META:
+            return SEGMENT_META[sym]["name_zh"]
         return fallback
 
-    def _node_color(self, layer: int, sym: str, attrs: Any) -> str:
+    def _node_color(self, layer: int, sym: str) -> str:
         if sym == "B(0)":
             return "#e2e8f0"
         if sym in ROOM_META:
@@ -103,12 +108,18 @@ class SceneGraphService:
         if sym in OBJECT_META:
             r, g, b = OBJECT_META[sym]["color"]
             return f"rgb({r},{g},{b})"
+        if sym in SEGMENT_META:
+            r, g, b = SEGMENT_META[sym]["color"]
+            return f"rgb({r},{g},{b})"
         if layer == 3:
             return "#22d3ee"
         return "#94a3b8"
 
     def serialize_graph(self) -> dict[str, Any]:
         nodes_out = []
+        has_mesh = self.G.has_mesh()
+        mesh = self.G.mesh if has_mesh else None
+
         for node in self.G.nodes:
             sym = str(node.id)
             attrs = node.attributes
@@ -117,8 +128,8 @@ class SceneGraphService:
             parent_sym = self._sym_str(parent_raw) if parent_raw is not None else None
             children_syms = [self._sym_str(c) for c in node.children()]
             siblings_syms = [self._sym_str(s) for s in node.siblings()]
-
             layer_num = self._layer_int(node.layer)
+
             item: dict[str, Any] = {
                 "id": sym,
                 "raw_id": int(node.id.value),
@@ -129,11 +140,25 @@ class SceneGraphService:
                 "name": getattr(attrs, "name", sym) or sym,
                 "name_zh": self._node_label_zh(sym, getattr(attrs, "name", sym)),
                 "position": pos,
-                "color": self._node_color(layer_num, sym, attrs),
+                "color": self._node_color(layer_num, sym),
                 "parent": parent_sym,
                 "children": children_syms,
                 "siblings": siblings_syms,
             }
+            if layer_num == 1:
+                mconns = [int(v) for v in attrs.mesh_connections]
+                item["mesh_connections"] = mconns
+                item["semantic_label"] = int(attrs.semantic_label)
+                if sym in SEGMENT_META:
+                    item["cluster_sim"] = SEGMENT_META[sym]["sim"]
+                if mesh is not None and mconns:
+                    poly = []
+                    for vid in mconns:
+                        vp = mesh.pos(vid)
+                        poly.append([round(float(vp[0]), 3), round(float(vp[1]), 3), round(float(vp[2]), 3)])
+                    item["mesh_polygon"] = poly
+                bbox = attrs.bounding_box
+                item["bbox_dims"] = [round(float(x), 3) for x in bbox.dimensions]
             if layer_num == 3:
                 item["distance"] = round(float(attrs.distance), 3)
             if layer_num in (2, 4):
@@ -147,12 +172,10 @@ class SceneGraphService:
         intra_edges = []
         for layer in self.G.layers:
             for e in layer.edges:
-                u_sym = self._sym_str(e.source)
-                v_sym = self._sym_str(e.target)
                 intra_edges.append(
                     {
-                        "source": u_sym,
-                        "target": v_sym,
+                        "source": self._sym_str(e.source),
+                        "target": self._sym_str(e.target),
                         "layer": int(layer.id),
                         "weight": round(float(e.info.weight), 3),
                         "kind": "intra",
@@ -173,9 +196,7 @@ class SceneGraphService:
                 }
             )
 
-        layer_counts = {
-            LAYER_NAMES[int(l.id)]: len(list(l.nodes)) for l in self.G.layers
-        }
+        layer_counts = {LAYER_NAMES[int(l.id)]: len(list(l.nodes)) for l in self.G.layers}
 
         return {
             "stats": {
@@ -184,6 +205,8 @@ class SceneGraphService:
                 "intra_edges": len(intra_edges),
                 "inter_edges": len(inter_edges),
                 "layers": layer_counts,
+                "mesh_vertices": int(mesh.num_vertices()) if mesh is not None else 0,
+                "mesh_faces": int(mesh.num_faces()) if mesh is not None else 0,
             },
             "nodes": nodes_out,
             "intra_edges": intra_edges,
@@ -200,10 +223,8 @@ class SceneGraphService:
 
         u_idx, v_idx = door["places"]
         ru_idx, rv_idx = door["rooms"]
-        p_u = dsg.NodeSymbol("p", u_idx)
-        p_v = dsg.NodeSymbol("p", v_idx)
-        r_u = dsg.NodeSymbol("R", ru_idx)
-        r_v = dsg.NodeSymbol("R", rv_idx)
+        p_u, p_v = dsg.NodeSymbol("p", u_idx), dsg.NodeSymbol("p", v_idx)
+        r_u, r_v = dsg.NodeSymbol("R", ru_idx), dsg.NodeSymbol("R", rv_idx)
 
         door["open"] = not door["open"]
         if door["open"]:
@@ -226,7 +247,6 @@ class SceneGraphService:
         else:
             if self.G.has_edge(p_u.value, p_v.value):
                 self.G.remove_edge(p_u.value, p_v.value)
-            # Check if any other open door connects the same two rooms
             still_connected = any(
                 d["open"] and set(d["rooms"]) == {ru_idx, rv_idx} for d in self.doors
             )
@@ -246,12 +266,18 @@ class SceneGraphService:
         }
 
     def _resolve_to_place_and_room(self, sym_str: str) -> tuple[str, str, str]:
-        """Return (original_sym, place_sym, room_sym)."""
+        """Return (original_sym, place_sym, room_sym), supporting L1 Segments -> L4 Rooms."""
         sym = self._parse_symbol(sym_str)
         if not self.G.has_node(sym.value):
             raise HTTPException(status_code=404, detail=f"Node not found: {sym_str}")
         node = self.G.get_node(sym.value)
         layer = self._layer_int(node.layer)
+        if layer == 1:  # Segment -> Object -> Place -> Room
+            o_node = self.G.get_node(node.get_parent())
+            p_raw = o_node.get_parent()
+            p_node = self.G.get_node(p_raw)
+            r_raw = p_node.get_parent()
+            return str(node.id), self._sym_str(p_raw), self._sym_str(r_raw)
         if layer == 2:  # Object -> Place -> Room
             p_raw = node.get_parent()
             p_node = self.G.get_node(p_raw)
@@ -260,18 +286,16 @@ class SceneGraphService:
         if layer == 3:  # Place -> Room
             r_raw = node.get_parent()
             return str(node.id), str(node.id), self._sym_str(r_raw)
-        if layer == 4:  # Room -> pick first child Place
+        if layer == 4:  # Room -> first child Place
             children = list(node.children())
             if not children:
                 raise HTTPException(status_code=400, detail=f"Room {sym_str} has no places")
             return str(node.id), self._sym_str(children[0]), str(node.id)
-        raise HTTPException(status_code=400, detail="请选择 Object / Place / Room 节点进行路径规划")
+        raise HTTPException(status_code=400, detail="请选择 Segment / Object / Place / Room 节点进行路径规划")
 
     def _dijkstra(self, layer_id: Any, start_sym: str, goal_sym: str) -> tuple[list[str], float]:
         layer = self.G.get_layer(layer_id)
-        adj: dict[str, list[tuple[str, float]]] = {}
-        for n in layer.nodes:
-            adj[str(n.id)] = []
+        adj: dict[str, list[tuple[str, float]]] = {str(n.id): [] for n in layer.nodes}
         for e in layer.edges:
             u = self._sym_str(e.source)
             v = self._sym_str(e.target)
@@ -350,9 +374,7 @@ class SceneGraphService:
         euclidean_dist = round(math.hypot(s_pos[0] - g_pos[0], s_pos[1] - g_pos[1]), 2)
         blocked, block_reason = self._check_straight_line_blocked(s_pos, g_pos)
 
-        # Stage 1: High-level planning on ROOMS layer (Spatial Concepts)
         room_path, _ = self._dijkstra(dsg.DsgLayers.ROOMS, s_room, g_room)
-        # Stage 2: Low-level planning on PLACES layer (Free-space topological graph)
         place_path, place_dist = self._dijkstra(dsg.DsgLayers.PLACES, s_place, g_place)
 
         reachable = len(place_path) > 0
@@ -361,7 +383,6 @@ class SceneGraphService:
         waypoints: list[list[float]] = []
 
         if reachable:
-            # Build full geometric waypoints: start -> place_path -> goal
             if s_orig != s_place:
                 waypoints.append([round(s_pos[0], 3), round(s_pos[1], 3), round(s_pos[2], 3)])
                 sp_pos = self.G.get_node(self._parse_symbol(s_place).value).attributes.position
@@ -393,13 +414,13 @@ class SceneGraphService:
         ]
 
         code = (
-            f"# 1. 沿层间边（Inter-layer edges）将物体映射到空间概念与自由空间\n"
-            f"start_place = G.get_node(NodeSymbol('{s_orig[0]}', {s_orig[2:-1]}).value).get_parent()  # -> {s_place} ({s_room})\n"
-            f"goal_place  = G.get_node(NodeSymbol('{g_orig[0]}', {g_orig[2:-1]}).value).get_parent()  # -> {g_place} ({g_room})\n"
-            f"# 2. 高层空间概念规划（ROOMS 层拓扑图）\n"
-            f"room_layer = G.get_layer(DsgLayers.ROOMS)   # -> {' -> '.join(room_path) if room_path else 'UNREACHABLE'}\n"
-            f"# 3. 底层自由空间规划（PLACES 层拓扑图）\n"
-            f"place_layer = G.get_layer(DsgLayers.PLACES) # -> {len(place_path)} 个无障碍航点"
+            f"# 1. 沿层间边将起点/目标上溯到自由空间 (L3) 与房间概念 (L4)\n"
+            f"start_place = '{s_place}'  # room={s_room}, from {s_orig}\n"
+            f"goal_place  = '{g_place}'  # room={g_room}, from {g_orig}\n"
+            f"# 2. 高层空间概念规划（DsgLayers.ROOMS 拓扑图）\n"
+            f"room_path   = {' -> '.join(room_path) if room_path else 'UNREACHABLE'}\n"
+            f"# 3. 底层自由空间规划（DsgLayers.PLACES Dijkstra）\n"
+            f"place_path  = {len(place_path)} 个无碰撞航点, 拓扑距离={topo_dist}m"
         )
 
         if not reachable:
@@ -415,8 +436,8 @@ class SceneGraphService:
             )
         else:
             summary = (
-                f"✅ 层次化规划成功：先在 Rooms 层规划房间序列（{' → '.join(r['name_zh'] for r in room_path_pretty)}），"
-                f"再在 Places 层生成 {len(place_path)} 个无碰撞自由空间航点，总拓扑路程 {topo_dist} m（直线 {euclidean_dist} m）。"
+                f"✅ 层次化规划成功：先在 L4 Rooms 层规划房间序列（{' → '.join(r['name_zh'] for r in room_path_pretty)}），"
+                f"再在 L3 Places 层生成 {len(place_path)} 个无碰撞航点，总拓扑路程 {topo_dist} m（直线 {euclidean_dist} m）。"
             )
 
         return {
@@ -457,13 +478,12 @@ class SceneGraphService:
         matches = []
         for node in self.G.nodes:
             layer = self._layer_int(node.layer)
-            if layer not in (2, 4):  # Match Objects & Rooms (Spatial Concepts)
+            if layer not in (1, 2, 4):  # Match Segments, Objects, and Rooms!
                 continue
             sym = str(node.id)
             name_en = (getattr(node.attributes, "name", "") or "").lower()
             name_zh = self._node_label_zh(sym, name_en).lower()
             if q in name_en or q in name_zh or name_zh in q or (name_en and name_en in q):
-                # Trace full hierarchy chain up to Building
                 chain = []
                 cur = node
                 while cur is not None:
@@ -487,16 +507,15 @@ class SceneGraphService:
                     }
                 )
 
-        # Prefer Object match first, then Room match
-        matches.sort(key=lambda m: (0 if m["layer"] == "OBJECTS" else 1, m["id"]))
-        auto_plan = None
-        if matches:
-            auto_plan = self.plan_hierarchical(start_id, matches[0]["id"])
+        # Prefer exact Segment/Object first, then Room
+        priority = {"SEGMENTS": 0, "OBJECTS": 1, "ROOMS": 2}
+        matches.sort(key=lambda m: (priority.get(m["layer"], 9), m["id"]))
+        auto_plan = self.plan_hierarchical(start_id, matches[0]["id"]) if matches else None
         return {"query": query, "matches": matches, "plan": auto_plan}
 
 
 service = SceneGraphService()
-app = FastAPI(title="Spark-DSG 3D Scene Graph Interactive Demo")
+app = FastAPI(title="Spark-DSG 5-Layer 3D Scene Graph Interactive Demo")
 
 
 class DoorToggleReq(BaseModel):
@@ -543,14 +562,20 @@ def reset_graph() -> dict[str, Any]:
 def get_dsg_json() -> dict[str, Any]:
     raw_text = DSG_PATH.read_text(encoding="utf-8")
     parsed = json.loads(raw_text)
-    sample = {
-        "file": str(DSG_PATH),
+    seg_samples = [n for n in parsed.get("nodes", []) if n.get("layer") == 1][:2]
+    obj_samples = [n for n in parsed.get("nodes", []) if n.get("layer") == 2][:2]
+    return {
+        "file": "data/smart_lab_dsg.json",
         "size_bytes": len(raw_text.encode("utf-8")),
         "top_level_keys": list(parsed.keys()),
-        "sample_nodes": parsed.get("nodes", [])[:4],
-        "sample_edges": parsed.get("edges", [])[:5],
+        "mesh_summary": {
+            "num_vertices": service.G.mesh.num_vertices() if service.G.has_mesh() else 0,
+            "num_faces": service.G.mesh.num_faces() if service.G.has_mesh() else 0,
+        },
+        "sample_L1_segment_nodes": seg_samples,
+        "sample_L2_object_nodes": obj_samples,
+        "sample_edges": parsed.get("edges", [])[:4],
     }
-    return sample
 
 
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")

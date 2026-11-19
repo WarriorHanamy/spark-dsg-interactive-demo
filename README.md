@@ -36,26 +36,31 @@ This demo **decouples physical geometry from abstract graph structure** into two
 
 <table>
   <tr>
-    <th width="50%">🧱 Experiment 1: Wall Trap (Geometric ≠ Topological)</th>
-    <th width="50%">🚪 Experiment 2: Live Door Toggle & Rerouting</th>
+    <th width="50%">🧩 Experiment 1: L1 SEGMENTS → L2 OBJECT Clustering</th>
+    <th width="50%">🧱 Experiment 2: Wall Trap (Geometric ≠ Topological)</th>
   </tr>
   <tr>
+    <td>
+      <img src="assets/demo-l1-segments.png" alt="L1 Segments to L2 Object Clustering" width="100%" />
+    </td>
     <td>
       <img src="assets/demo-wall-trap.png" alt="Wall Trap Experiment" width="100%" />
     </td>
-    <td>
-      <img src="assets/demo-door-reroute.png" alt="Dynamic Door Rerouting Experiment" width="100%" />
-    </td>
   </tr>
   <tr>
     <td>
-      <code>Laptop O(8)</code> → <code>Bedside Lamp O(11)</code> are only <strong>1.6 m</strong> apart across a solid wall (<code>🧱 实心隔墙</code>), yet have <strong>zero horizontal edge</strong> between <code>R(3) Office</code> and <code>R(4) Bedroom</code>. The planner detours <strong>19.36 m (12.1×)</strong> via <code>Office → Corridor → Bedroom</code>.
+      Explicitly registers <code>DsgLayers.SEGMENTS</code> (Layer 1) via <code>G.add_layer(1, 0, DsgLayers.SEGMENTS)</code> and attaches a real <code>spark_dsg.Mesh()</code> (<strong>112 vertices / 56 triangular faces</strong>). Shows how multi-part mesh patches (e.g., <code>s(0) 座垫 + s(1) 靠背 + s(2) 扶手</code>) link via <code>mesh_connections</code> and cluster upward into a single L2 Object (<code>O(0) Sofa</code>).
     </td>
     <td>
-      Click the <code>🔓开</code> doorway pill directly on the left wall to close it — the backend calls real <code>G.remove_edge()</code> on <code>spark_dsg.DynamicSceneGraph</code>. The right graph snaps to <code>🔒 已断开</code> and reroutes <code>Sofa → Coffee Mug</code> from <strong>10.73 m</strong> direct to <strong>20.08 m</strong> via the Corridor.
+      <code>Laptop O(8)</code> → <code>Bedside Lamp O(11)</code> are only <strong>1.6 m</strong> apart across a solid wall (<code>🧱 实心隔墙</code>), yet have <strong>zero horizontal edge</strong> between <code>R(3) Office</code> and <code>R(4) Bedroom</code>. The planner detours <strong>19.36 m (12.1×)</strong> via <code>Office → Corridor → Bedroom</code>.
     </td>
   </tr>
 </table>
+
+### 🚪 Experiment 3: Live Door Toggle & Rerouting
+<img src="assets/demo-door-reroute.png" alt="Dynamic Door Rerouting Experiment" width="100%" />
+
+*Click the `🔓开` doorway pill directly on the left wall to close it — the backend calls real `G.remove_edge()` on `spark_dsg.DynamicSceneGraph`. The right graph snaps to `🔒断开` and reroutes `Sofa → Coffee Mug` from **10.73 m** direct to **20.08 m** via the Corridor.*
 
 Other built-in interactions:
 - **Bidirectional Hover & Click Spotlight**: Hover or click any node or edge on either side to highlight its full vertical ancestry chain (`B → R → p → O`) and horizontal topological neighbors across both views, while inspecting the exact `spark_dsg` Python API call in the bottom dock.
@@ -74,7 +79,7 @@ Following MIT's **3D Dynamic Scene Graph (Hydra / Spark-DSG)** hierarchy:
 | **L4** | `DsgLayers.ROOMS` | Room-level **Spatial Concepts** (`R(0)–R(4)`) with horizontal edges encoding room-to-room doorway connectivity |
 | **L3** | `DsgLayers.PLACES` | Traversable free-space nodes (`p(0)–p(16)`) with ESDF obstacle clearance radius; backbone for collision-free path planning |
 | **L2** | `DsgLayers.OBJECTS` *(+ `AGENTS`)* | Concrete 3D semantic objects (`O(0)–O(13)`) with bounding boxes, mounted vertically to their nearest `Place` |
-| *(Underlying)* **L1** | `Mesh` / `SEGMENTS` | Dense metric-semantic 3D geometry & pre-object segments (represented here by the left 2D architectural floorplan) |
+| **L1** | `DsgLayers.SEGMENTS` *(+ `G.mesh`)* | **28 pre-object geometric/semantic segments** (`s(0)–s(27)`) indexing real 3D mesh vertices (`112 verts / 56 triangular faces`) via `mesh_connections`, with horizontal adjacency edges (`s(a)↔s(b)`) and vertical clustering into L2 Objects |
 
 ---
 

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>3D Scene Graph 双向联动解析 — MIT-SPARK / Spark-DSG</title>
+  <title>3D Scene Graph 完整 5 层双向联动解析 — MIT-SPARK / Spark-DSG</title>
   <style>
     :root {
       --bg: #080e1c;
@@ -17,6 +17,7 @@
       --amber: #fbbf24;
       --emerald: #34d399;
       --rose: #fb7185;
+      --teal: #2dd4bf;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -33,7 +34,7 @@
 
     /* Top Header */
     header {
-      padding: 8px 14px;
+      padding: 7px 14px;
       background: linear-gradient(90deg, #0c1529 0%, #111d36 100%);
       border-bottom: 1px solid var(--border);
       display: flex;
@@ -54,13 +55,13 @@
       border-radius: 6px;
       letter-spacing: 0.3px;
     }
-    .brand h1 { font-size: 14px; font-weight: 700; }
-    .brand .sub { font-size: 11.5px; color: var(--muted); font-weight: 400; margin-left: 4px; }
+    .brand h1 { font-size: 13.8px; font-weight: 700; }
+    .brand .sub { font-size: 11px; color: var(--muted); font-weight: 400; margin-left: 4px; }
 
-    .exp-bar { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .exp-bar { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
     .exp-btn {
-      font-size: 11.5px;
-      padding: 5px 10px;
+      font-size: 11.2px;
+      padding: 4.5px 9px;
       border-radius: 7px;
       border: 1px solid var(--border);
       background: #17233b;
@@ -80,7 +81,7 @@
     .dual-stage {
       flex: 1;
       display: grid;
-      grid-template-columns: 47% 53%;
+      grid-template-columns: 46% 54%;
       min-height: 0;
       gap: 1px;
       background: var(--border);
@@ -103,36 +104,31 @@
     }
 
     .pane-head {
-      padding: 7px 12px;
+      padding: 6px 11px;
       background: #0d1629;
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
+      gap: 6px;
       flex-wrap: wrap;
       flex-shrink: 0;
     }
 
     .pane-title {
-      font-size: 12.5px;
+      font-size: 12px;
       font-weight: 700;
       display: flex;
       align-items: center;
       gap: 6px;
     }
 
-    .pane-sub {
-      font-size: 11px;
-      color: var(--muted);
-      font-weight: 400;
-    }
-
+    .pane-sub { font-size: 10.8px; color: var(--muted); font-weight: 400; }
     .pane-controls { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
 
     .mini-chip {
-      font-size: 11px;
-      padding: 3px 8px;
+      font-size: 10.8px;
+      padding: 3px 7px;
       border-radius: 6px;
       border: 1px solid var(--border);
       background: #141f35;
@@ -140,7 +136,7 @@
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 5px;
+      gap: 4px;
       user-select: none;
     }
     .mini-chip:hover { color: #fff; border-color: #475569; }
@@ -157,7 +153,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 6px;
+      padding: 5px;
       overflow: hidden;
       position: relative;
     }
@@ -173,12 +169,11 @@
     .dir-legend {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      padding: 5px 12px;
+      gap: 8px;
+      padding: 4px 11px;
       background: #0b1324;
       border-bottom: 1px solid rgba(36, 51, 82, 0.7);
-      font-size: 11px;
+      font-size: 10.5px;
       color: #cbd5e1;
       flex-wrap: wrap;
       flex-shrink: 0;
@@ -187,54 +182,48 @@
     .dir-item {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       cursor: pointer;
-      padding: 2px 6px;
+      padding: 2px 5px;
       border-radius: 5px;
       transition: opacity 0.14s, background 0.14s;
     }
     .dir-item:hover { background: rgba(255,255,255,0.06); }
     .dir-item.off { opacity: 0.35; text-decoration: line-through; }
 
-    .swatch-h { width: 22px; height: 0; display: inline-block; }
-    .swatch-v { width: 0; height: 14px; display: inline-block; }
+    .swatch-h { width: 18px; height: 0; display: inline-block; }
+    .swatch-v { width: 0; height: 12px; display: inline-block; }
 
-    /* Bottom Dock: Planner + Live Inspector */
+    /* Bottom Dock */
     .bottom-dock {
-      background: var(--panel);
-      border-top: 1px solid var(--border);
       display: grid;
-      grid-template-columns: 47% 53%;
+      grid-template-columns: 46% 54%;
       gap: 1px;
       background-color: var(--border);
+      border-top: 1px solid var(--border);
       flex-shrink: 0;
-      min-height: 158px;
-      max-height: 205px;
+      min-height: 152px;
+      max-height: 196px;
     }
 
     .dock-box {
       background: var(--panel);
-      padding: 9px 12px;
+      padding: 8px 11px;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-      gap: 7px;
+      gap: 6px;
     }
 
-    .dock-row {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
+    .dock-row { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
 
     select, input[type="text"] {
       background: #0b1325;
       border: 1px solid var(--border);
       color: #f1f5f9;
-      padding: 5px 8px;
+      padding: 4.5px 7px;
       border-radius: 6px;
-      font-size: 11.5px;
+      font-size: 11px;
       outline: none;
     }
     select:focus, input[type="text"]:focus { border-color: var(--cyan); }
@@ -243,9 +232,9 @@
       background: linear-gradient(135deg, #0891b2, #4f46e5);
       color: #fff;
       border: none;
-      padding: 5px 11px;
+      padding: 5px 10px;
       border-radius: 6px;
-      font-size: 11.5px;
+      font-size: 11px;
       font-weight: 600;
       cursor: pointer;
     }
@@ -255,17 +244,17 @@
       background: #1b2842;
       color: #cbd5e1;
       border: 1px solid var(--border);
-      padding: 5px 9px;
+      padding: 4.5px 8px;
       border-radius: 6px;
-      font-size: 11.5px;
+      font-size: 11px;
       cursor: pointer;
     }
     .secondary-btn:hover { color: #fff; border-color: #475569; }
 
     .plan-banner {
-      font-size: 11.8px;
-      line-height: 1.5;
-      padding: 7px 10px;
+      font-size: 11.4px;
+      line-height: 1.48;
+      padding: 6px 9px;
       border-radius: 7px;
       background: rgba(34, 211, 238, 0.1);
       border: 1px solid rgba(34, 211, 238, 0.32);
@@ -276,16 +265,15 @@
       border-color: rgba(244, 63, 94, 0.45);
       color: #ffe4e6;
     }
-
-    .metric-strip {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-      font-size: 11.5px;
+    .plan-banner.teal {
+      background: rgba(45, 212, 191, 0.12);
+      border-color: rgba(45, 212, 191, 0.45);
+      color: #ccfbf1;
     }
+
+    .metric-strip { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 11px; }
     .m-pill {
-      padding: 3px 8px;
+      padding: 2.5px 7px;
       border-radius: 6px;
       background: #0b1325;
       border: 1px solid var(--border);
@@ -300,23 +288,13 @@
       align-items: center;
       justify-content: space-between;
       gap: 8px;
-      font-size: 12px;
+      font-size: 11.8px;
       font-weight: 650;
     }
 
-    .insp-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      align-items: start;
-    }
-
-    .insp-meta {
-      font-size: 11.5px;
-      line-height: 1.55;
-      color: #cbd5e1;
-    }
-    .insp-meta code { color: #67e8f9; font-family: ui-monospace, monospace; font-size: 11px; }
+    .insp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; align-items: start; }
+    .insp-meta { font-size: 11.2px; line-height: 1.52; color: #cbd5e1; }
+    .insp-meta code { color: #67e8f9; font-family: ui-monospace, monospace; font-size: 10.6px; }
 
     pre.mini-code {
       background: #080f1e;
@@ -324,22 +302,21 @@
       border-radius: 7px;
       padding: 6px 8px;
       font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      font-size: 10.5px;
-      line-height: 1.45;
+      font-size: 10.3px;
+      line-height: 1.44;
       color: #93c5fd;
       white-space: pre-wrap;
       word-break: break-word;
-      max-height: 108px;
+      max-height: 104px;
       overflow-y: auto;
     }
 
-    /* SVG interactive cursor & transitions */
-    .interactive-node { cursor: pointer; transition: opacity 0.15s; }
-    .interactive-edge { cursor: pointer; transition: opacity 0.15s; }
+    .interactive-node { cursor: pointer; transition: opacity 0.14s; }
+    .interactive-edge { cursor: pointer; transition: opacity 0.14s; }
     .door-hit { cursor: pointer; }
     .door-hit:hover rect { filter: brightness(1.22); }
 
-    /* Modal for Spark-DSG JSON & Repo Info */
+    /* Modal */
     .modal-backdrop {
       position: fixed;
       inset: 0;
@@ -353,8 +330,8 @@
     }
     .modal-backdrop.open { display: flex; }
     .modal-card {
-      width: min(740px, 95vw);
-      max-height: 85vh;
+      width: min(760px, 95vw);
+      max-height: 86vh;
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: 12px;
@@ -381,31 +358,31 @@
   </style>
 </head>
 <body>
-  <!-- Header -->
   <header>
     <div class="brand">
       <span class="badge">MIT-SPARK / Spark-DSG</span>
-      <h1>Scene Graph 双向联动解析 <span class="sub">左看真实户型 · 右看抽象图谱 · 零 3D 眩晕</span></h1>
+      <h1>完整 5 层 Scene Graph 双向联动解析 <span class="sub">L5 建筑 → L4 房间 → L3 空地 → L2 物体 → L1 Segments & Mesh</span></h1>
     </div>
     <div class="exp-bar">
-      <button class="exp-btn active" id="btnExpWall" onclick="runPreset('wall_trap', this)">🧱 实验1: 穿墙陷阱</button>
-      <button class="exp-btn" id="btnExpDoor" onclick="runPreset('door_reroute', this)">🚪 实验2: 关门改道</button>
-      <button class="exp-btn" id="btnExpLong" onclick="runPreset('long_range', this)">🤖 实验3: 语义长程导航</button>
-      <button class="exp-btn" onclick="clearPlan()">✨ 仅看图结构</button>
+      <button class="exp-btn active" id="btnExpSeg" onclick="runSegmentDemo(this)">🧩 实验1: L1片段→L2聚类</button>
+      <button class="exp-btn" id="btnExpWall" onclick="runPreset('wall_trap', this)">🧱 实验2: 穿墙陷阱</button>
+      <button class="exp-btn" id="btnExpDoor" onclick="runPreset('door_reroute', this)">🚪 实验3: 关门改道</button>
+      <button class="exp-btn" id="btnExpLong" onclick="runPreset('long_range', this)">🤖 实验4: 长程导航</button>
+      <button class="exp-btn" onclick="clearPlan()">✨ 全图</button>
       <button class="exp-btn" onclick="openRepoModal()">📦 源码 & JSON</button>
     </div>
   </header>
 
-  <!-- Linked Dual-View Stage -->
   <main class="dual-stage">
-    <!-- LEFT PANE: Fixed North-Up 2D Architectural Floorplan -->
+    <!-- LEFT PANE: 2D Architectural Floorplan + Triangulated L1 Mesh Segments -->
     <section class="pane">
       <div class="pane-head">
         <div class="pane-title">
-          🗺️ 左视图：真实物理空间 <span class="pane-sub">(永远上北下南 · 点击墙上的门可开关)</span>
+          🗺️ 左视图：真实物理空间 + L1 三角网格片段 <span class="pane-sub">(点击门可开关 · 悬停片段看聚类)</span>
         </div>
         <div class="pane-controls">
-          <button class="mini-chip active" id="chipMapPlaces" onclick="toggleMapPlaces(this)">● 显示自由空间网</button>
+          <button class="mini-chip active" id="chipMapSegs" onclick="toggleMapSegs(this)">▲ L1 网格片段</button>
+          <button class="mini-chip active" id="chipMapPlaces" onclick="toggleMapPlaces(this)">● L3 自由空间</button>
           <button class="mini-chip" id="chipMapEsdf" onclick="toggleMapEsdf(this)">◯ ESDF 半径</button>
         </div>
       </div>
@@ -414,96 +391,90 @@
       </div>
     </section>
 
-    <!-- RIGHT PANE: Orthogonal 4-Layer Scene Graph -->
+    <!-- RIGHT PANE: Orthogonal 5-Layer Scene Graph (L5 -> L1 + Mesh) -->
     <section class="pane">
       <div class="pane-head">
         <div class="pane-title">
-          🕸️ 右视图：Spark-DSG 层次场景图 <span class="pane-sub" id="graphStatsText">(加载中...)</span>
+          🕸️ 右视图：完整 5 层 Spark-DSG <span class="pane-sub" id="graphStatsText">(加载中...)</span>
         </div>
         <div class="pane-controls">
-          <span style="font-size:11px; color:#94a3b8;">悬停任意节点/边 → 两侧同步高亮</span>
+          <span style="font-size:10.5px; color:#94a3b8;">悬停任意节点/边 → 两侧同步高亮</span>
         </div>
       </div>
 
-      <!-- Crystal-clear Direction Legend: Vertical = Hierarchy, Horizontal = Topology -->
       <div class="dir-legend">
-        <span class="dir-item" data-edge="edgeL4" onclick="toggleEdgeVis('edgeL4', this)" title="点击开关 L4 房间横向拓扑边">
+        <span class="dir-item" data-edge="edgeL4" onclick="toggleEdgeVis('edgeL4', this)">
           <span class="swatch-h" style="border-top: 3px solid #c084fc;"></span>
-          <span><strong style="color:#d8b4fe;">←→ 横向紫实线</strong> 房间连通 (Room↔Room)</span>
+          <span><strong style="color:#d8b4fe;">←→ 房间连通</strong> (L4)</span>
         </span>
-        <span class="dir-item" data-edge="edgeL3" onclick="toggleEdgeVis('edgeL3', this)" title="点击开关 L3 自由空间横向拓扑边">
+        <span class="dir-item" data-edge="edgeL3" onclick="toggleEdgeVis('edgeL3', this)">
           <span class="swatch-h" style="border-top: 2.5px solid #22d3ee;"></span>
-          <span><strong style="color:#67e8f9;">←→ 横向青/绿实线</strong> 可通行通道 (Place↔Place)</span>
+          <span><strong style="color:#67e8f9;">←→ 空地通行</strong> (L3)</span>
         </span>
-        <span class="dir-item" data-edge="edgeHier" onclick="toggleEdgeVis('edgeHier', this)" title="点击开关纵向从属边">
+        <span class="dir-item" data-edge="edgeHier" onclick="toggleEdgeVis('edgeHier', this)">
           <span class="swatch-v" style="border-left: 2px dashed #a78bfa;"></span>
-          <span><strong style="color:#c4b5fd;">↑↓ 纵向虚线</strong> 层间从属 (大楼↓房间↓空地)</span>
+          <span><strong style="color:#c4b5fd;">↑↓ 概念归属</strong> (L5↓L4↓L3)</span>
         </span>
-        <span class="dir-item" data-edge="edgeMount" onclick="toggleEdgeVis('edgeMount', this)" title="点击开关物体挂载边">
+        <span class="dir-item" data-edge="edgeMount" onclick="toggleEdgeVis('edgeMount', this)">
           <span class="swatch-v" style="border-left: 2px dotted #fbbf24;"></span>
-          <span><strong style="color:#fcd34d;">↑↓ 纵向橙点线</strong> 物体挂载 (空地↓家具)</span>
+          <span><strong style="color:#fcd34d;">↑↓ 物体挂载</strong> (L3↓L2)</span>
+        </span>
+        <span class="dir-item" data-edge="edgeSeg" onclick="toggleEdgeVis('edgeSeg', this)">
+          <span class="swatch-v" style="border-left: 2px dotted #2dd4bf;"></span>
+          <span><strong style="color:#5eead4;">↑↓ 片段聚合 & 邻接</strong> (L2↓L1)</span>
         </span>
       </div>
 
       <div class="svg-wrap">
-        <svg id="graphSvg" class="stage-svg" viewBox="0 0 780 540" preserveAspectRatio="xMidYMid meet"></svg>
+        <svg id="graphSvg" class="stage-svg" viewBox="0 0 780 650" preserveAspectRatio="xMidYMid meet"></svg>
       </div>
     </section>
   </main>
 
-  <!-- Bottom Dock: Planner + Live Inspector -->
   <footer class="bottom-dock">
-    <!-- Left Dock: Planning & Semantic Query -->
     <div class="dock-box">
       <div class="dock-row">
-        <span style="font-size:11.5px; font-weight:650; color:#e2e8f0;">🧭 规划：</span>
-        <select id="startSelect" style="max-width:165px;"></select>
+        <span style="font-size:11px; font-weight:650; color:#e2e8f0;">🧭 规划：</span>
+        <select id="startSelect" style="max-width:150px;"></select>
         <span style="color:#64748b;">→</span>
-        <select id="goalSelect" style="max-width:165px;"></select>
+        <select id="goalSelect" style="max-width:150px;"></select>
         <button class="primary-btn" onclick="runCustomPlan()">规划</button>
-        <button class="secondary-btn" onclick="replayRobot()">▶ 重播</button>
-        <input type="text" id="queryInput" placeholder="语义搜：咖啡杯/卧室" style="width:130px;" onkeydown="if(event.key==='Enter') runQuery()" />
+        <button class="secondary-btn" onclick="replayRobot()">▶</button>
+        <input type="text" id="queryInput" placeholder="搜片段/物体：靠背/咖啡杯" style="width:138px;" onkeydown="if(event.key==='Enter') runQuery()" />
         <button class="secondary-btn" onclick="runQuery()">🔍</button>
       </div>
-
-      <div id="planDockContent">
-        <div class="plan-banner">
-          点击上方 <strong>🧱 实验1: 穿墙陷阱</strong>、直接点击左侧地图里的<strong>绿色门洞</strong>开关门，或悬停左右两侧任意节点观察双向联动。
-        </div>
-      </div>
+      <div id="planDockContent"></div>
     </div>
 
-    <!-- Right Dock: Live Linked Node/Edge Inspector + Spark-DSG API -->
     <div class="dock-box">
       <div class="insp-header">
-        <span id="inspTitle">🧬 实时联动检查器（悬停或点击左侧地图 / 右侧图谱的任意节点或边）</span>
+        <span id="inspTitle">🧬 实时 5 层联动检查器（含 L1 SEGMENTS & G.mesh 顶点索引）</span>
         <button class="secondary-btn" style="padding:2px 7px; font-size:10.5px;" onclick="clearSelection()">取消锁定</button>
       </div>
       <div class="insp-grid">
         <div class="insp-meta" id="inspMeta">
-          <strong>核心记忆口诀：</strong><br/>
-          • <strong>左图</strong>看物理现实（距离近不代表能走过去）<br/>
-          • <strong>右图横向实线 (←→)</strong> = 拓扑连通性（有门才连）<br/>
-          • <strong>右图纵向虚线 (↑↓)</strong> = 空间概念归属（包含关系）
+          <strong>L1 SEGMENTS 存在的意义：</strong><br/>
+          • 底层 SAM / 几何过分割先把 <code>G.mesh</code> 切成多个局部碎片 <code>s(k)</code><br/>
+          • 邻接且语义相似的碎片再向上<strong>聚类成 L2 完整物体</strong>（如 3 块碎片 → 沙发）
         </div>
-        <pre class="mini-code" id="inspCode"># 后端实时运行 MIT-SPARK/Spark-DSG
-G = spark_dsg.DynamicSceneGraph.load("smart_lab_dsg.json")
-# 点击门洞会调用 G.remove_edge() / G.insert_edge()
-# 点击节点会调用 G.get_node(NodeSymbol(...).value)</pre>
+        <pre class="mini-code" id="inspCode"># Spark-DSG 显式注册 L1 SEGMENTS 层 + 挂接 3D Mesh
+G.add_layer(1, 0, dsg.DsgLayers.SEGMENTS)
+s_attr.mesh_connections = [v0, v1, v2, v3]  # 指向 G.mesh 顶点
+G.insert_edge(NodeSymbol('O', 0).value, NodeSymbol('s', 0).value)</pre>
       </div>
     </div>
   </footer>
 
-  <!-- Repo & JSON Modal -->
+  <!-- Modal -->
   <div class="modal-backdrop" id="repoModal" onclick="if(event.target===this) closeRepoModal()">
     <div class="modal-card">
       <div class="modal-head">
-        <span>📦 MIT-SPARK/Spark-DSG 开源仓库与真实序列化 JSON</span>
+        <span>📦 MIT-SPARK/Spark-DSG 完整 5 层 JSON（含 L1 SEGMENTS 与 Mesh）</span>
         <button class="secondary-btn" onclick="closeRepoModal()">关闭 ✕</button>
       </div>
       <div class="modal-body">
         <p style="margin-bottom:8px;">
-          本 Demo 后端直接驱动 MIT SPARK Lab 开源的 <strong><code>spark_dsg</code></strong>（<a href="https://github.com/MIT-SPARK/Spark-DSG" target="_blank" style="color:#67e8f9;">MIT-SPARK/Spark-DSG</a>）。你在左侧点击开关门时，后端实时修改同一个内存中的 <code>DynamicSceneGraph</code> 对象并重新运行两阶段规划（先 <code>DsgLayers.ROOMS</code> 房间层，再 <code>DsgLayers.PLACES</code> 自由空间层）。
+          后端真实调用 <a href="https://github.com/MIT-SPARK/Spark-DSG" target="_blank" style="color:#67e8f9;">MIT-SPARK/Spark-DSG</a> 的 <code>G.add_layer(1, 0, DsgLayers.SEGMENTS)</code> 和 <code>G.mesh = dsg.Mesh()</code>，并通过 <code>G.save("smart_lab_dsg.json", include_mesh=True)</code> 序列化了全部 5 层节点、边与 3D 网格。
         </p>
         <pre class="mini-code" id="modalJson" style="max-height:420px;">加载中...</pre>
       </div>
@@ -511,7 +482,6 @@ G = spark_dsg.DynamicSceneGraph.load("smart_lab_dsg.json")
   </div>
 
   <script>
-    // ============== Icons & Constants ==============
     const SVG_NS = "http://www.w3.org/2000/svg";
 
     const OBJECT_ICONS = {
@@ -526,8 +496,7 @@ G = spark_dsg.DynamicSceneGraph.load("smart_lab_dsg.json")
       "R(0)": "🛋️", "R(1)": "🍳", "R(2)": "🚶", "R(3)": "💻", "R(4)": "🛏️",
     };
 
-    // Orthogonal 2D layout for the Right Scene Graph (viewBox 780 x 540)
-    // Ordered left-to-right to match spatial intuition: Kitchen | Living Room | Corridor | Office | Bedroom
+    // Orthogonal 5-Layer Coordinates (viewBox 780 x 650)
     const ROOM_COLUMNS = [
       { id: "R(1)", x: 112, x0: 54,  x1: 170, color: "#f59e0b" },
       { id: "R(0)", x: 244, x0: 184, x1: 304, color: "#3b82f6" },
@@ -538,58 +507,50 @@ G = spark_dsg.DynamicSceneGraph.load("smart_lab_dsg.json")
 
     const GRAPH_POS = {
       // L5 Building
-      "B(0)": { x: 392, y: 40 },
-      // L4 Rooms (Spatial Concepts)
-      "R(1)": { x: 112, y: 148 },
-      "R(0)": { x: 244, y: 148 },
-      "R(2)": { x: 392, y: 148 },
-      "R(3)": { x: 542, y: 148 },
-      "R(4)": { x: 688, y: 148 },
-      // L3 Places (Free Space, neatly grouped under each Room)
-      "p(4)": { x: 76,  y: 296 },
-      "p(5)": { x: 114, y: 296 },
-      "p(3)": { x: 150, y: 296 },
-
-      "p(0)": { x: 204, y: 296 },
-      "p(1)": { x: 244, y: 296 },
-      "p(2)": { x: 284, y: 296 },
-
-      "p(6)":  { x: 334, y: 296 },
-      "p(7)":  { x: 363, y: 296 },
-      "p(8)":  { x: 392, y: 296 },
-      "p(9)":  { x: 421, y: 296 },
-      "p(10)": { x: 450, y: 296 },
-
-      "p(11)": { x: 500, y: 296 },
-      "p(12)": { x: 542, y: 296 },
-      "p(13)": { x: 584, y: 296 },
-
-      "p(14)": { x: 648, y: 296 },
-      "p(15)": { x: 688, y: 296 },
-      "p(16)": { x: 730, y: 296 },
-
-      // L2 Objects (staggered on two clean rows y=432 / y=482 so ZERO labels ever touch!)
-      "O(4)":  { x: 74,  y: 432 },
-      "O(3)":  { x: 96,  y: 486 },
-      "O(5)":  { x: 138, y: 432 },
-
-      "O(0)":  { x: 196, y: 432 },
-      "O(1)":  { x: 222, y: 486 },
-      "O(2)":  { x: 266, y: 432 },
-
-      "O(6)":  { x: 344, y: 432 },
-      "O(7)":  { x: 410, y: 486 },
-
-      "O(10)": { x: 498, y: 432 },
-      "O(9)":  { x: 542, y: 486 },
-      "O(8)":  { x: 584, y: 432 },
-
-      "O(13)": { x: 646, y: 432 },
-      "O(12)": { x: 688, y: 486 },
-      "O(11)": { x: 732, y: 432 },
+      "B(0)": { x: 392, y: 29 },
+      // L4 Rooms
+      "R(1)": { x: 112, y: 118 },
+      "R(0)": { x: 244, y: 118 },
+      "R(2)": { x: 392, y: 118 },
+      "R(3)": { x: 542, y: 118 },
+      "R(4)": { x: 688, y: 118 },
+      // L3 Places
+      "p(4)": { x: 76,  y: 238 }, "p(5)": { x: 114, y: 238 }, "p(3)": { x: 150, y: 238 },
+      "p(0)": { x: 204, y: 238 }, "p(1)": { x: 244, y: 238 }, "p(2)": { x: 284, y: 238 },
+      "p(6)": { x: 334, y: 238 }, "p(7)": { x: 363, y: 238 }, "p(8)": { x: 392, y: 238 }, "p(9)": { x: 421, y: 238 }, "p(10)": { x: 450, y: 238 },
+      "p(11)": { x: 500, y: 238 }, "p(12)": { x: 542, y: 238 }, "p(13)": { x: 584, y: 238 },
+      "p(14)": { x: 648, y: 238 }, "p(15)": { x: 688, y: 238 }, "p(16)": { x: 730, y: 238 },
+      // L2 Objects (2 clean staggered rows)
+      "O(4)":  { x: 78,  y: 342 }, "O(3)":  { x: 104, y: 392 }, "O(5)":  { x: 142, y: 342 },
+      "O(0)":  { x: 204, y: 342 }, "O(1)":  { x: 232, y: 392 }, "O(2)":  { x: 274, y: 342 },
+      "O(6)":  { x: 356, y: 342 }, "O(7)":  { x: 422, y: 392 },
+      "O(10)": { x: 504, y: 342 }, "O(9)":  { x: 542, y: 392 }, "O(8)":  { x: 580, y: 342 },
+      "O(13)": { x: 654, y: 342 }, "O(12)": { x: 690, y: 392 }, "O(11)": { x: 728, y: 342 },
+      // L1 Segments (28 real Spark-DSG segments neatly packed inside each Room column, 0 overlap!)
+      // Col 0: Kitchen
+      "s(8)":  { x: 76,  y: 472 }, "s(9)":  { x: 112, y: 472 },
+      "s(7)":  { x: 96,  y: 522 },
+      "s(10)": { x: 114, y: 572 }, "s(11)": { x: 150, y: 572 },
+      // Col 1: Living Room
+      "s(0)":  { x: 204, y: 472 }, "s(1)":  { x: 238, y: 472 }, "s(2)":  { x: 272, y: 472 },
+      "s(3)":  { x: 210, y: 522 }, "s(4)":  { x: 246, y: 522 },
+      "s(5)":  { x: 250, y: 572 }, "s(6)":  { x: 286, y: 572 },
+      // Col 2: Corridor
+      "s(12)": { x: 346, y: 486 }, "s(13)": { x: 384, y: 486 },
+      "s(14)": { x: 422, y: 552 },
+      // Col 3: Office
+      "s(19)": { x: 498, y: 472 }, "s(20)": { x: 534, y: 472 },
+      "s(17)": { x: 524, y: 522 }, "s(18)": { x: 560, y: 522 },
+      "s(15)": { x: 550, y: 572 }, "s(16)": { x: 586, y: 572 },
+      // Col 4: Bedroom
+      "s(26)": { x: 648, y: 472 }, "s(27)": { x: 684, y: 472 },
+      "s(23)": { x: 654, y: 522 }, "s(25)": { x: 690, y: 522 }, "s(24)": { x: 726, y: 522 },
+      "s(21)": { x: 702, y: 572 }, "s(22)": { x: 738, y: 572 },
     };
 
-    // ============== App State ==============
+    const DEMO_CLUSTER_OBJECTS = ["O(0)", "O(12)", "O(8)"];
+    let clusterCycleIdx = 0;
+
     let graphData = null;
     let nodeMap = {};
     let doorByPlacePair = {};
@@ -598,31 +559,29 @@ G = spark_dsg.DynamicSceneGraph.load("smart_lab_dsg.json")
 
     let selectedNodeId = null;
     let hoveredNodeId = null;
-    let hoveredEdgeKey = null; // e.g. "R(0)|R(1)" or "p(2)|p(3)"
+    let hoveredEdgeKey = null;
 
     const state = {
+      showMapSegs: true,
       showMapPlaces: true,
       showMapEsdf: false,
       edgeL4: true,
       edgeL3: true,
       edgeHier: true,
       edgeMount: true,
+      edgeSeg: true,
     };
 
     const robotAnim = { progress: 0, speed: 0.24, playing: false };
     let robotSvgDot = null;
     let robotSvgRing = null;
 
-    // ============== Floorplan Coordinate Transform (North-Up, Zero Rotation!) ==============
-    // World: x in [0, 16], y in [0, 12] -> SVG viewBox 650 x 510
     const MAP_OX = 52;
     const MAP_OY = 44;
-    const MAP_SCALE = 35; // 16*35 = 560px wide, 12*35 = 420px tall
-
+    const MAP_SCALE = 35;
     function mx(wx) { return MAP_OX + wx * MAP_SCALE; }
     function my(wy) { return MAP_OY + (12 - wy) * MAP_SCALE; }
 
-    // ============== SVG Builder Helper ==============
     function svgEl(tag, attrs = {}, text = null) {
       const el = document.createElementNS(SVG_NS, tag);
       for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
@@ -630,11 +589,8 @@ G = spark_dsg.DynamicSceneGraph.load("smart_lab_dsg.json")
       return el;
     }
 
-    function pairKey(a, b) {
-      return a < b ? `${a}|${b}` : `${b}|${a}`;
-    }
+    function pairKey(a, b) { return a < b ? `${a}|${b}` : `${b}|${a}`; }
 
-    // ============== API Calls ==============
     async function apiJson(url, opts) {
       const res = await fetch(url, opts);
       if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
@@ -655,10 +611,8 @@ G = spark_dsg.DynamicSceneGraph.load("smart_lab_dsg.json")
       doorByPlacePair = {};
       doorByRoomPair = {};
       for (const d of graphData.doors) {
-        const pk = pairKey(`p(${d.places[0]})`, `p(${d.places[1]})`);
-        const rk = pairKey(`R(${d.rooms[0]})`, `R(${d.rooms[1]})`);
-        doorByPlacePair[pk] = d;
-        doorByRoomPair[rk] = d;
+        doorByPlacePair[pairKey(`p(${d.places[0]})`, `p(${d.places[1]})`)] = d;
+        doorByRoomPair[pairKey(`R(${d.rooms[0]})`, `R(${d.rooms[1]})`)] = d;
       }
     }
 
@@ -672,11 +626,8 @@ G = spark_dsg.DynamicSceneGraph.load("smart_lab_dsg.json")
       rebuildIndices();
       updateHeaderStats();
       setInspectorCode(data.executed_code, `🚪 门状态已更新：${data.door.name_zh} → ${data.door.open ? "开启（拓扑连通）" : "关闭（拓扑断开）"}`);
-      if (activePlan) {
-        await runPlan(activePlan.start.id, activePlan.goal.id, false);
-      } else {
-        renderAll();
-      }
+      if (activePlan) await runPlan(activePlan.start.id, activePlan.goal.id, false);
+      else renderAll();
     }
 
     async function runPlan(startId, goalId, showCode = true) {
@@ -706,7 +657,7 @@ G = spark_dsg.DynamicSceneGraph.load("smart_lab_dsg.json")
         body: JSON.stringify({ query: q, start_id: startId }),
       });
       if (!data.matches || data.matches.length === 0) {
-        document.getElementById("planDockContent").innerHTML = `<div class="plan-banner danger">未找到匹配 “${escapeHtml(q)}” 的物体或空间概念。</div>`;
+        document.getElementById("planDockContent").innerHTML = `<div class="plan-banner danger">未找到匹配 “${escapeHtml(q)}” 的片段、物体或空间概念。</div>`;
         return;
       }
       const m = data.matches[0];
@@ -721,36 +672,37 @@ G = spark_dsg.DynamicSceneGraph.load("smart_lab_dsg.json")
       renderAll();
     }
 
-    // ============== Focus / Spotlight Helpers ==============
+    // ============== Focus / Spotlight (Full 5-layer upward + downward chain!) ==============
     function computeFocus() {
       const focusNode = hoveredNodeId || selectedNodeId;
       if (hoveredEdgeKey) {
         const [a, b] = hoveredEdgeKey.split("|");
-        return {
-          mode: "edge",
-          nodes: new Set([a, b]),
-          edges: new Set([hoveredEdgeKey]),
-        };
+        return { mode: "edge", nodes: new Set([a, b]), edges: new Set([hoveredEdgeKey]) };
       }
       if (!focusNode || !nodeMap[focusNode]) return null;
 
       const nodes = new Set([focusNode]);
       const edges = new Set();
 
-      // Vertical upward ancestry chain (Object -> Place -> Room -> Building)
+      // Upward ancestry (s -> O -> p -> R -> B)
       let cur = nodeMap[focusNode];
       while (cur && cur.parent && nodeMap[cur.parent]) {
         edges.add(pairKey(cur.id, cur.parent));
         nodes.add(cur.parent);
         cur = nodeMap[cur.parent];
       }
-      // Vertical downward children (1 hop, plus grandchildren if Room/Building for clarity)
+      // Direct downward children (and if Object is focused, also highlight intra-edges between its child Segments!)
       const fn = nodeMap[focusNode];
       for (const c of fn.children) {
         nodes.add(c);
         edges.add(pairKey(focusNode, c));
+        if (fn.layer === 2 && nodeMap[c]) {
+          for (const sib of nodeMap[c].siblings) {
+            if (fn.children.includes(sib)) edges.add(pairKey(c, sib));
+          }
+        }
       }
-      // Horizontal intra-layer topological neighbors
+      // Direct horizontal siblings
       for (const s of fn.siblings) {
         nodes.add(s);
         edges.add(pairKey(focusNode, s));
@@ -770,16 +722,18 @@ G = spark_dsg.DynamicSceneGraph.load("smart_lab_dsg.json")
       for (let i = 0; i < activePlan.place_path.length - 1; i++) {
         placeEdges.add(pairKey(activePlan.place_path[i], activePlan.place_path[i + 1]));
       }
-      if (activePlan.start.id !== activePlan.start.place) {
-        mountEdges.add(pairKey(activePlan.start.id, activePlan.start.place));
-      }
-      if (activePlan.goal.id !== activePlan.goal.place) {
-        mountEdges.add(pairKey(activePlan.goal.id, activePlan.goal.place));
+      // Walk start/goal up to Place (supporting L1 Segment -> L2 Object -> L3 Place!)
+      for (const endId of [activePlan.start.id, activePlan.goal.id]) {
+        let cur = nodeMap[endId];
+        while (cur && cur.layer < 3 && cur.parent && nodeMap[cur.parent]) {
+          mountEdges.add(pairKey(cur.id, cur.parent));
+          cur = nodeMap[cur.parent];
+        }
       }
       return { roomEdges, placeEdges, mountEdges };
     }
 
-    // ============== Render LEFT PANE: 2D Architectural Floorplan ==============
+    // ============== Render LEFT PANE: 2D Floorplan + Triangulated L1 Mesh Segments ==============
     function renderFloorplan() {
       const svg = document.getElementById("mapSvg");
       svg.innerHTML = "";
@@ -788,44 +742,28 @@ G = spark_dsg.DynamicSceneGraph.load("smart_lab_dsg.json")
       const focus = computeFocus();
       const planSets = getActivePlanEdgeSets();
 
-      // Background subtle grid + meter ruler
+      // Base grid & meter ruler
       const bgG = svgEl("g");
       bgG.appendChild(svgEl("rect", {
         x: mx(0), y: my(12), width: 16 * MAP_SCALE, height: 12 * MAP_SCALE,
         fill: "#0b1426", stroke: "#334155", "stroke-width": 1.5, rx: 4,
       }));
       for (let gx = 0; gx <= 16; gx += 2) {
-        bgG.appendChild(svgEl("line", {
-          x1: mx(gx), y1: my(12), x2: mx(gx), y2: my(0),
-          stroke: "rgba(148,163,184,0.08)", "stroke-width": 1,
-        }));
+        bgG.appendChild(svgEl("line", { x1: mx(gx), y1: my(12), x2: mx(gx), y2: my(0), stroke: "rgba(148,163,184,0.08)", "stroke-width": 1 }));
       }
       for (let gy = 0; gy <= 12; gy += 2) {
-        bgG.appendChild(svgEl("line", {
-          x1: mx(0), y1: my(gy), x2: mx(16), y2: my(gy),
-          stroke: "rgba(148,163,184,0.08)", "stroke-width": 1,
-        }));
+        bgG.appendChild(svgEl("line", { x1: mx(0), y1: my(gy), x2: mx(16), y2: my(gy), stroke: "rgba(148,163,184,0.08)", "stroke-width": 1 }));
       }
-      // Axis ticks
       for (const gx of [0, 6, 10, 16]) {
-        bgG.appendChild(svgEl("text", {
-          x: mx(gx), y: my(0) + 18, fill: "#64748b", "font-size": 10.5,
-          "text-anchor": "middle", "font-family": "ui-monospace, monospace",
-        }, `${gx}m`));
+        bgG.appendChild(svgEl("text", { x: mx(gx), y: my(0) + 18, fill: "#64748b", "font-size": 10.5, "text-anchor": "middle", "font-family": "ui-monospace, monospace" }, `${gx}m`));
       }
       for (const gy of [0, 6, 12]) {
-        bgG.appendChild(svgEl("text", {
-          x: mx(0) - 10, y: my(gy) + 4, fill: "#64748b", "font-size": 10.5,
-          "text-anchor": "end", "font-family": "ui-monospace, monospace",
-        }, `${gy}m`));
+        bgG.appendChild(svgEl("text", { x: mx(0) - 10, y: my(gy) + 4, fill: "#64748b", "font-size": 10.5, "text-anchor": "end", "font-family": "ui-monospace, monospace" }, `${gy}m`));
       }
-      // North compass badge
-      bgG.appendChild(svgEl("text", {
-        x: mx(16) + 12, y: my(12) + 14, fill: "#94a3b8", "font-size": 11, "font-weight": 700,
-      }, "N ↑"));
+      bgG.appendChild(svgEl("text", { x: mx(16) + 12, y: my(12) + 14, fill: "#94a3b8", "font-size": 11, "font-weight": 700 }, "N ↑"));
       svg.appendChild(bgG);
 
-      // Room Floor Tiles (clickable!)
+      // Rooms
       const roomsG = svgEl("g");
       for (const r of graphData.rooms_floorplan) {
         const rid = `R(${r.idx})`;
@@ -836,24 +774,21 @@ G = spark_dsg.DynamicSceneGraph.load("smart_lab_dsg.json")
 
         const rect = svgEl("rect", {
           x: mx(x0), y: my(y1), width: (x1 - x0) * MAP_SCALE, height: (y1 - y0) * MAP_SCALE,
-          fill: `rgba(${cr},${cg},${cb}, ${isHot ? 0.24 : inPlan ? 0.16 : 0.09})`,
+          fill: `rgba(${cr},${cg},${cb}, ${isHot ? 0.22 : inPlan ? 0.15 : 0.085})`,
           stroke: isHot ? "#fde047" : "none",
-          "stroke-width": isHot ? 2.2 : 0,
+          "stroke-width": isHot ? 2 : 0,
           class: "interactive-node",
         });
         attachNodeEvents(rect, rid);
         roomsG.appendChild(rect);
 
-        // Room title pinned cleanly in top-left (or top-right for Bedroom R(4) to avoid Wardrobe O(13))
         const isBedroom = rid === "R(4)";
-        const labelX = isBedroom ? mx(x1) - 10 : mx(x0) + 10;
-        const labelY = my(y1) + 20;
         const lbl = svgEl("text", {
-          x: labelX, y: labelY,
+          x: isBedroom ? mx(x1) - 10 : mx(x0) + 10,
+          y: my(y1) + 20,
           fill: `rgba(${cr},${cg},${cb}, ${isHot ? 1.0 : 0.88})`,
-          "font-size": 12.5, "font-weight": 750,
+          "font-size": 12.2, "font-weight": 750,
           "text-anchor": isBedroom ? "end" : "start",
-          "data-node-id": rid,
           class: "interactive-node",
         }, `${ROOM_ICONS[rid] || ""} ${r.name_zh} ${rid}`);
         attachNodeEvents(lbl, rid);
@@ -861,45 +796,92 @@ G = spark_dsg.DynamicSceneGraph.load("smart_lab_dsg.json")
       }
       svg.appendChild(roomsG);
 
-      // Optional ESDF clearance circles on map
+      // L1 Triangulated Mesh Segments rendered directly on the floorplan!
+      if (state.showMapSegs) {
+        const segG = svgEl("g");
+        for (const n of graphData.nodes) {
+          if (n.layer !== 1 || !n.mesh_polygon || n.mesh_polygon.length < 4) continue;
+          const isHot = focus && focus.nodes.has(n.id);
+          const isExactFocus = focus && focus.focusId === n.id;
+          const dim = focus && !isHot;
+
+          const pts = n.mesh_polygon.map((p) => `${mx(p[0])},${my(p[1])}`).join(" ");
+          const g = svgEl("g", { class: "interactive-node", opacity: dim ? 0.2 : 1 });
+
+          // Filled mesh patch
+          g.appendChild(svgEl("polygon", {
+            points: pts,
+            fill: isExactFocus ? "rgba(250, 204, 21, 0.55)" : isHot ? n.color.replace("rgb(", "rgba(").replace(")", ", 0.52)") : n.color.replace("rgb(", "rgba(").replace(")", ", 0.26)"),
+            stroke: isExactFocus ? "#fef08a" : isHot ? "#fde047" : n.color,
+            "stroke-width": isExactFocus ? 2.6 : isHot ? 2.0 : 1.1,
+          }));
+          // Diagonal triangle seam showing the 2 real triangles in G.mesh!
+          const p0 = n.mesh_polygon[0], p2 = n.mesh_polygon[2];
+          g.appendChild(svgEl("line", {
+            x1: mx(p0[0]), y1: my(p0[1]), x2: mx(p2[0]), y2: my(p2[1]),
+            stroke: isHot ? "rgba(254,240,138,0.85)" : "rgba(255,255,255,0.22)",
+            "stroke-width": isHot ? 1.2 : 0.8,
+            "stroke-dasharray": "2 2",
+          }));
+
+          // When spotlighted (e.g. Experiment 1 clustering or hover), show exact segment badge!
+          if (isHot) {
+            const cx = mx(n.position[0]), cy = my(n.position[1]);
+            const txt = `${n.id} ${n.name_zh}`;
+            const tw = txt.length * 7.8 + 10;
+            g.appendChild(svgEl("rect", {
+              x: cx - tw / 2, y: cy - 8, width: tw, height: 15, rx: 4,
+              fill: isExactFocus ? "#fde047" : "rgba(15,23,42,0.92)",
+              stroke: "#2dd4bf", "stroke-width": 1,
+            }));
+            g.appendChild(svgEl("text", {
+              x: cx, y: cy + 2.8,
+              fill: isExactFocus ? "#0f172a" : "#99f6e4",
+              "font-size": 9, "font-weight": 700, "text-anchor": "middle",
+            }, txt));
+          }
+
+          attachNodeEvents(g, n.id);
+          segG.appendChild(g);
+        }
+        svg.appendChild(segG);
+      }
+
+      // ESDF circles
       if (state.showMapEsdf) {
-        const esdfG = svgEl("g");
+        const esdfG = svgEl("g", { "pointer-events": "none" });
         for (const n of graphData.nodes) {
           if (n.layer !== 3 || !n.distance) continue;
           esdfG.appendChild(svgEl("circle", {
             cx: mx(n.position[0]), cy: my(n.position[1]), r: n.distance * MAP_SCALE,
-            fill: "rgba(34,211,238,0.08)", stroke: "rgba(34,211,238,0.35)",
-            "stroke-width": 1, "stroke-dasharray": "3 3",
+            fill: "rgba(34,211,238,0.08)", stroke: "rgba(34,211,238,0.35)", "stroke-width": 1, "stroke-dasharray": "3 3",
           }));
         }
         svg.appendChild(esdfG);
       }
 
-      // Architectural Walls
+      // Walls
       const wallsG = svgEl("g");
       for (const [x1, y1, x2, y2] of graphData.walls) {
         const isSolidHighlight = y1 === 6.0 && y2 === 6.0 && x1 === 10.0 && x2 === 16.0;
         wallsG.appendChild(svgEl("line", {
           x1: mx(x1), y1: my(y1), x2: mx(x2), y2: my(y2),
           stroke: isSolidHighlight ? "#fb7185" : "#94a3b8",
-          "stroke-width": isSolidHighlight ? 6 : 4,
-          "stroke-linecap": "round",
+          "stroke-width": isSolidHighlight ? 6 : 4, "stroke-linecap": "round",
         }));
         if (isSolidHighlight) {
-          // Red hazard badge centered slightly left of Laptop/Lamp
           const bx = mx(11.75), by = my(6.0);
           wallsG.appendChild(svgEl("rect", {
-            x: bx - 48, y: by - 10, width: 96, height: 20, rx: 5,
-            fill: "#881337", stroke: "#fb7185", "stroke-width": 1.2,
+            x: bx - 48, y: by - 10, width: 96, height: 20, rx: 5, fill: "#881337", stroke: "#fb7185", "stroke-width": 1.2,
           }));
           wallsG.appendChild(svgEl("text", {
-            x: bx, y: by + 4, fill: "#ffe4e6", "font-size": 10.5, "font-weight": 700, "text-anchor": "middle",
+            x: bx, y: by + 4, fill: "#ffe4e6", "font-size": 10.2, "font-weight": 700, "text-anchor": "middle",
           }, "🧱 实心隔墙(无门)"));
         }
       }
       svg.appendChild(wallsG);
 
-      // L3 Places Topological Graph Overlay on Floorplan
+      // L3 Places Overlay
       if (state.showMapPlaces) {
         const pEdgeG = svgEl("g");
         for (const e of graphData.intra_edges) {
@@ -913,10 +895,9 @@ G = spark_dsg.DynamicSceneGraph.load("smart_lab_dsg.json")
           const dim = focus && !isHot && !isPlanEdge;
 
           const line = svgEl("line", {
-            x1: mx(u.position[0]), y1: my(u.position[1]),
-            x2: mx(v.position[0]), y2: my(v.position[1]),
-            stroke: isPlanEdge ? "#34d399" : isHot ? "#fde047" : isDoor ? "#34d399" : "rgba(34,211,238,0.55)",
-            "stroke-width": isPlanEdge ? 4.5 : isHot ? 3.8 : isDoor ? 2.6 : 1.8,
+            x1: mx(u.position[0]), y1: my(u.position[1]), x2: mx(v.position[0]), y2: my(v.position[1]),
+            stroke: isPlanEdge ? "#34d399" : isHot ? "#fde047" : isDoor ? "#34d399" : "rgba(34,211,238,0.52)",
+            "stroke-width": isPlanEdge ? 4.5 : isHot ? 3.8 : isDoor ? 2.5 : 1.7,
             opacity: dim ? 0.16 : 1,
             class: "interactive-edge",
           });
@@ -925,7 +906,6 @@ G = spark_dsg.DynamicSceneGraph.load("smart_lab_dsg.json")
         }
         svg.appendChild(pEdgeG);
 
-        // Place nodes on map
         const pNodeG = svgEl("g");
         for (const n of graphData.nodes) {
           if (n.layer !== 3) continue;
@@ -935,11 +915,9 @@ G = spark_dsg.DynamicSceneGraph.load("smart_lab_dsg.json")
 
           const g = svgEl("g", { class: "interactive-node", opacity: dim ? 0.25 : 1 });
           g.appendChild(svgEl("circle", {
-            cx: mx(n.position[0]), cy: my(n.position[1]),
-            r: isHot || inPlan ? 7 : 5,
+            cx: mx(n.position[0]), cy: my(n.position[1]), r: isHot || inPlan ? 7 : 5,
             fill: inPlan ? "#34d399" : "#22d3ee",
-            stroke: isHot ? "#fde047" : "#0b1426",
-            "stroke-width": isHot ? 2.2 : 1.5,
+            stroke: isHot ? "#fde047" : "#0b1426", "stroke-width": isHot ? 2.2 : 1.5,
           }));
           if (isHot || inPlan) {
             g.appendChild(svgEl("text", {
@@ -953,8 +931,7 @@ G = spark_dsg.DynamicSceneGraph.load("smart_lab_dsg.json")
         svg.appendChild(pNodeG);
       }
 
-      // Active Plan Overlay (Straight Euclidean vs Topological Route + Animated Robot)
-      // pointer-events="none" so path polylines NEVER block clicking doors or nodes!
+      // Active Plan Overlay (pointer-events="none" so doors/objects/segments stay 100% clickable!)
       robotSvgDot = null;
       robotSvgRing = null;
       if (activePlan) {
@@ -962,7 +939,6 @@ G = spark_dsg.DynamicSceneGraph.load("smart_lab_dsg.json")
         const sp = activePlan.start.position;
         const gp = activePlan.goal.position;
 
-        // Straight Euclidean dashed line
         planG.appendChild(svgEl("line", {
           x1: mx(sp[0]), y1: my(sp[1]), x2: mx(gp[0]), y2: my(gp[1]),
           stroke: activePlan.straight_line_blocked ? "#fb7185" : "#fbbf24",
@@ -974,7 +950,6 @@ G = spark_dsg.DynamicSceneGraph.load("smart_lab_dsg.json")
           ? `✕ 直线 ${activePlan.euclidean_distance}m (穿墙被挡)`
           : `直线 ${activePlan.euclidean_distance}m`;
         const bw = badgeText.length * 7.2 + 16;
-        // Shift badge cleanly away from walls/icons
         const offX = activePlan.start.id === "O(8)" && activePlan.goal.id === "O(11)" ? 52 : (activePlan.start.id === "O(0)" && activePlan.goal.id === "O(3)" ? 58 : 0);
         planG.appendChild(svgEl("rect", {
           x: midX + offX - bw / 2, y: midY - 10, width: bw, height: 20, rx: 6,
@@ -984,7 +959,6 @@ G = spark_dsg.DynamicSceneGraph.load("smart_lab_dsg.json")
           x: midX + offX, y: midY + 3.8, fill: "#fff", "font-size": 10.5, "font-weight": 700, "text-anchor": "middle",
         }, badgeText));
 
-        // Topological waypoints polyline
         if (activePlan.reachable && activePlan.waypoints.length >= 2) {
           const pts = activePlan.waypoints.map((w) => `${mx(w[0])},${my(w[1])}`).join(" ");
           planG.appendChild(svgEl("polyline", {
@@ -992,69 +966,58 @@ G = spark_dsg.DynamicSceneGraph.load("smart_lab_dsg.json")
             "stroke-linecap": "round", "stroke-linejoin": "round", opacity: 0.9,
           }));
           robotSvgRing = svgEl("circle", { cx: mx(sp[0]), cy: my(sp[1]), r: 12, fill: "rgba(52,211,153,0.3)" });
-          robotSvgDot = svgEl("circle", {
-            cx: mx(sp[0]), cy: my(sp[1]), r: 6.5, fill: "#10b981", stroke: "#ecfdf5", "stroke-width": 2.2,
-          });
+          robotSvgDot = svgEl("circle", { cx: mx(sp[0]), cy: my(sp[1]), r: 6.5, fill: "#10b981", stroke: "#ecfdf5", "stroke-width": 2.2 });
           planG.appendChild(robotSvgRing);
           planG.appendChild(robotSvgDot);
         }
         svg.appendChild(planG);
       }
 
-      // L2 Semantic Objects (Furniture icons + crisp pills)
+      // L2 Objects (Hide icon badge slightly when one of its L1 Segments is spotlighted so you can clearly see the underlying mesh patches!)
       const objG = svgEl("g");
       for (const n of graphData.nodes) {
         if (n.layer !== 2) continue;
         const cx = mx(n.position[0]);
         const cy = my(n.position[1]);
         const isHot = focus && focus.nodes.has(n.id);
+        const isFocusParentOfSeg = focus && focus.focusId && nodeMap[focus.focusId]?.layer === 1 && nodeMap[focus.focusId]?.parent === n.id;
+        const isExactClusterFocus = focus && focus.focusId === n.id && state.showMapSegs;
         const isEndpoint = activePlan && (activePlan.start.id === n.id || activePlan.goal.id === n.id);
         const dim = focus && !isHot && !isEndpoint;
 
-        const g = svgEl("g", { class: "interactive-node", "data-node-id": n.id, opacity: dim ? 0.25 : 1 });
+        // If inspecting this object's L1 mesh patches, make its center icon compact/translucent so the multi-part patches underneath shine!
+        const compactMode = isExactClusterFocus || isFocusParentOfSeg;
+        const g = svgEl("g", { class: "interactive-node", opacity: dim ? 0.22 : compactMode ? 0.45 : 1 });
 
-        if (isHot || isEndpoint) {
+        if (!compactMode) {
+          if (isHot || isEndpoint) {
+            g.appendChild(svgEl("circle", { cx, cy, r: 16, fill: isEndpoint ? "rgba(52,211,153,0.28)" : "rgba(250,204,21,0.28)" }));
+          }
           g.appendChild(svgEl("circle", {
-            cx, cy, r: 17,
-            fill: isEndpoint ? "rgba(52,211,153,0.28)" : "rgba(250,204,21,0.28)",
+            cx, cy, r: 11.5, fill: "#0f172a",
+            stroke: isHot ? "#fde047" : isEndpoint ? "#34d399" : n.color,
+            "stroke-width": isHot || isEndpoint ? 2.4 : 1.7,
           }));
-        }
-        g.appendChild(svgEl("circle", {
-          cx, cy, r: 12.5,
-          fill: "#0f172a",
-          stroke: isHot ? "#fde047" : isEndpoint ? "#34d399" : n.color,
-          "stroke-width": isHot || isEndpoint ? 2.5 : 1.8,
-        }));
-        g.appendChild(svgEl("text", {
-          x: cx, y: cy + 4.5, "font-size": 13, "text-anchor": "middle",
-        }, OBJECT_ICONS[n.id] || "📦"));
+          g.appendChild(svgEl("text", { x: cx, y: cy + 4.2, "font-size": 12.2, "text-anchor": "middle" }, OBJECT_ICONS[n.id] || "📦"));
 
-        // Label neatly below or above icon (Wardrobe O(13) placed below so it never touches top border)
-        const labelAbove = n.id === "O(11)" || n.id === "O(4)" || n.id === "O(5)";
-        const ly = labelAbove ? cy - 17 : cy + 23;
-        const txt = `${n.name_zh}`;
-        const tw = txt.length * 10 + 10;
-        g.appendChild(svgEl("rect", {
-          x: cx - tw / 2, y: ly - 9, width: tw, height: 15, rx: 4,
-          fill: isHot ? "#fde047" : "rgba(8,14,28,0.85)",
-        }));
-        g.appendChild(svgEl("text", {
-          x: cx, y: ly + 2.2,
-          fill: isHot ? "#0f172a" : "#e2e8f0",
-          "font-size": 10, "font-weight": 650, "text-anchor": "middle",
-        }, txt));
+          const labelAbove = n.id === "O(11)" || n.id === "O(4)" || n.id === "O(5)";
+          const ly = labelAbove ? cy - 16 : cy + 22;
+          const txt = n.name_zh;
+          const tw = txt.length * 9.8 + 9;
+          g.appendChild(svgEl("rect", { x: cx - tw / 2, y: ly - 9, width: tw, height: 14.5, rx: 4, fill: isHot ? "#fde047" : "rgba(8,14,28,0.84)" }));
+          g.appendChild(svgEl("text", { x: cx, y: ly + 2, fill: isHot ? "#0f172a" : "#e2e8f0", "font-size": 9.8, "font-weight": 650, "text-anchor": "middle" }, txt));
+        }
 
         attachNodeEvents(g, n.id);
         objG.appendChild(g);
       }
       svg.appendChild(objG);
 
-      // Directly Clickable Interactive Doors rendered AT THE VERY TOP so nothing ever occludes them!
+      // Interactive Doors ALWAYS ON TOP
       const doorsG = svgEl("g");
       for (const d of graphData.doors) {
         const [x1, y1, x2, y2] = d.segment;
-        const cx = mx((x1 + x2) / 2);
-        const cy = my((y1 + y2) / 2);
+        const cx = mx((x1 + x2) / 2), cy = my((y1 + y2) / 2);
         const pk = pairKey(`p(${d.places[0]})`, `p(${d.places[1]})`);
         const rk = pairKey(`R(${d.rooms[0]})`, `R(${d.rooms[1]})`);
         const isEdgeHovered = hoveredEdgeKey === pk || hoveredEdgeKey === rk;
@@ -1063,8 +1026,7 @@ G = spark_dsg.DynamicSceneGraph.load("smart_lab_dsg.json")
         dg.appendChild(svgEl("line", {
           x1: mx(x1), y1: my(y1), x2: mx(x2), y2: my(y2),
           stroke: d.open ? "#34d399" : "#fb7185",
-          "stroke-width": isEdgeHovered ? 7 : 5,
-          "stroke-dasharray": d.open ? "5 3" : "none",
+          "stroke-width": isEdgeHovered ? 7 : 5, "stroke-dasharray": d.open ? "5 3" : "none",
         }));
         dg.appendChild(svgEl("rect", {
           x: cx - 23, y: cy - 11, width: 46, height: 22, rx: 11,
@@ -1073,19 +1035,11 @@ G = spark_dsg.DynamicSceneGraph.load("smart_lab_dsg.json")
           "stroke-width": isEdgeHovered ? 2.4 : 1.6,
         }));
         dg.appendChild(svgEl("text", {
-          x: cx, y: cy + 3.8, fill: "#fff", "font-size": 9.8, "font-weight": 700, "text-anchor": "middle",
-          "pointer-events": "none",
+          x: cx, y: cy + 3.8, fill: "#fff", "font-size": 9.8, "font-weight": 700, "text-anchor": "middle", "pointer-events": "none",
         }, d.open ? "🔓开" : "🔒关"));
 
-        // Hover ONLY updates the right Scene Graph so this door DOM node is NEVER destroyed before click!
-        dg.addEventListener("mouseenter", () => {
-          hoveredEdgeKey = pk;
-          renderSceneGraph();
-        });
-        dg.addEventListener("mouseleave", () => {
-          hoveredEdgeKey = null;
-          renderSceneGraph();
-        });
+        dg.addEventListener("mouseenter", () => { hoveredEdgeKey = pk; renderSceneGraph(); });
+        dg.addEventListener("mouseleave", () => { hoveredEdgeKey = null; renderSceneGraph(); });
         doorsG.appendChild(dg);
       }
       svg.appendChild(doorsG);
@@ -1093,7 +1047,7 @@ G = spark_dsg.DynamicSceneGraph.load("smart_lab_dsg.json")
       updateRobotPosition();
     }
 
-    // ============== Render RIGHT PANE: Orthogonal 4-Layer Scene Graph ==============
+    // ============== Render RIGHT PANE: Orthogonal 5-Layer Scene Graph (L5 -> L1 + Mesh) ==============
     function renderSceneGraph() {
       const svg = document.getElementById("graphSvg");
       svg.innerHTML = "";
@@ -1102,57 +1056,53 @@ G = spark_dsg.DynamicSceneGraph.load("smart_lab_dsg.json")
       const focus = computeFocus();
       const planSets = getActivePlanEdgeSets();
 
-      // 1. Horizontal Layer Band Backgrounds (Crystal-clear 4-tier structure!)
+      // 1. 5 Horizontal Layer Bands + Bottom Mesh Bar
       const bands = [
-        { y: 10,  h: 62,  label: "L5\n建筑", color: "#e2e8f0", bg: "rgba(226,232,240,0.03)", stroke: "rgba(226,232,240,0.16)" },
-        { y: 82,  h: 112, label: "L4\n房间\n概念", color: "#d8b4fe", bg: "rgba(192,132,252,0.04)", stroke: "rgba(192,132,252,0.22)" },
-        { y: 204, h: 174, label: "L3\n自由\n空间", color: "#67e8f9", bg: "rgba(34,211,238,0.04)", stroke: "rgba(34,211,238,0.22)" },
-        { y: 388, h: 142, label: "L2\n具体\n物体", color: "#fcd34d", bg: "rgba(251,191,36,0.04)", stroke: "rgba(251,191,36,0.22)" },
+        { y: 6,   h: 46,  label: "L5\n建筑", color: "#e2e8f0", bg: "rgba(226,232,240,0.03)", stroke: "rgba(226,232,240,0.16)" },
+        { y: 58,  h: 96,  label: "L4\n房间\n概念", color: "#d8b4fe", bg: "rgba(192,132,252,0.04)", stroke: "rgba(192,132,252,0.22)" },
+        { y: 160, h: 132, label: "L3\n自由\n空间", color: "#67e8f9", bg: "rgba(34,211,238,0.04)", stroke: "rgba(34,211,238,0.22)" },
+        { y: 298, h: 130, label: "L2\n具体\n物体", color: "#fcd34d", bg: "rgba(251,191,36,0.04)", stroke: "rgba(251,191,36,0.22)" },
+        { y: 434, h: 174, label: "L1\n几何\n片段\nSeg", color: "#5eead4", bg: "rgba(45,212,191,0.045)", stroke: "rgba(45,212,191,0.28)" },
       ];
       const bandG = svgEl("g");
       for (const b of bands) {
-        bandG.appendChild(svgEl("rect", {
-          x: 8, y: b.y, width: 764, height: b.h, rx: 9,
-          fill: b.bg, stroke: b.stroke, "stroke-width": 1,
-        }));
+        bandG.appendChild(svgEl("rect", { x: 8, y: b.y, width: 764, height: b.h, rx: 8, fill: b.bg, stroke: b.stroke, "stroke-width": 1 }));
         const lines = b.label.split("\n");
-        const startY = b.y + b.h / 2 - ((lines.length - 1) * 13) / 2 + 4;
+        const startY = b.y + b.h / 2 - ((lines.length - 1) * 12) / 2 + 4;
         lines.forEach((ln, idx) => {
           bandG.appendChild(svgEl("text", {
-            x: 28, y: startY + idx * 13, fill: b.color,
-            "font-size": idx === 0 ? 11 : 10, "font-weight": 750, "text-anchor": "middle",
+            x: 28, y: startY + idx * 12, fill: b.color,
+            "font-size": idx === 0 ? 10.8 : 9.5, "font-weight": 750, "text-anchor": "middle",
           }, ln));
         });
       }
 
-      // Subtle vertical Room column guides across L3 & L2 so hierarchy alignment is instant
-      for (const col of ROOM_COLUMNS) {
-        bandG.appendChild(svgEl("rect", {
-          x: col.x0, y: 214, width: col.x1 - col.x0, height: 154, rx: 7,
-          fill: "rgba(15,23,42,0.45)", stroke: col.color, "stroke-opacity": 0.22, "stroke-width": 1,
-        }));
-        bandG.appendChild(svgEl("rect", {
-          x: col.x0, y: 398, width: col.x1 - col.x0, height: 122, rx: 7,
-          fill: "rgba(15,23,42,0.45)", stroke: col.color, "stroke-opacity": 0.22, "stroke-width": 1,
-        }));
-      }
-
-      // Explicit Red "🧱 隔墙无边" barrier between R(3) Office and R(4) Bedroom in L4 & L3!
-      const wallX = 615;
-      bandG.appendChild(svgEl("line", {
-        x1: wallX, y1: 112, x2: wallX, y2: 368,
-        stroke: "rgba(251,113,133,0.65)", "stroke-width": 2, "stroke-dasharray": "4 4",
-      }));
+      // Underlying G.mesh Foundation Strip at very bottom
+      const mv = graphData.stats.mesh_vertices || 0;
+      const mf = graphData.stats.mesh_faces || 0;
       bandG.appendChild(svgEl("rect", {
-        x: wallX - 24, y: 138, width: 48, height: 18, rx: 4,
-        fill: "#881337", stroke: "#fb7185", "stroke-width": 1,
+        x: 8, y: 614, width: 764, height: 28, rx: 6,
+        fill: "rgba(15, 23, 42, 0.9)", stroke: "rgba(148, 163, 184, 0.3)", "stroke-dasharray": "4 3",
       }));
       bandG.appendChild(svgEl("text", {
-        x: wallX, y: 150, fill: "#ffe4e6", "font-size": 9, "font-weight": 700, "text-anchor": "middle",
-      }, "🧱 无横边"));
+        x: 392, y: 632, fill: "#94a3b8", "font-size": 10.8, "font-weight": 600, "text-anchor": "middle",
+      }, `▲ 底层 3D 几何语义网格 G.mesh (${mv} 顶点 / ${mf} 三角面片) — 每个 L1 Segment 通过 mesh_connections 索引对应三角片`));
+
+      // Subtle vertical Room column guides across L3, L2, and L1
+      for (const col of ROOM_COLUMNS) {
+        bandG.appendChild(svgEl("rect", { x: col.x0, y: 168, width: col.x1 - col.x0, height: 116, rx: 6, fill: "rgba(15,23,42,0.42)", stroke: col.color, "stroke-opacity": 0.20 }));
+        bandG.appendChild(svgEl("rect", { x: col.x0, y: 306, width: col.x1 - col.x0, height: 114, rx: 6, fill: "rgba(15,23,42,0.42)", stroke: col.color, "stroke-opacity": 0.20 }));
+        bandG.appendChild(svgEl("rect", { x: col.x0, y: 444, width: col.x1 - col.x0, height: 154, rx: 6, fill: "rgba(15,23,42,0.42)", stroke: col.color, "stroke-opacity": 0.22 }));
+      }
+
+      // Red "🧱 无横边" wall divider between Office R(3) and Bedroom R(4)
+      const wallX = 615;
+      bandG.appendChild(svgEl("line", { x1: wallX, y1: 84, x2: wallX, y2: 286, stroke: "rgba(251,113,133,0.65)", "stroke-width": 2, "stroke-dasharray": "4 4" }));
+      bandG.appendChild(svgEl("rect", { x: wallX - 24, y: 108, width: 48, height: 17, rx: 4, fill: "#881337", stroke: "#fb7185", "stroke-width": 1 }));
+      bandG.appendChild(svgEl("text", { x: wallX, y: 119.5, fill: "#ffe4e6", "font-size": 8.8, "font-weight": 700, "text-anchor": "middle" }, "🧱 无横边"));
       svg.appendChild(bandG);
 
-      // 2. VERTICAL INTER-LAYER EDGES (Hierarchy: B->R, R->p, p->O)
+      // 2. VERTICAL INTER-LAYER EDGES (B->R, R->p, p->O, O->s)
       const vEdgeG = svgEl("g");
       for (const e of graphData.inter_edges) {
         const u = nodeMap[e.source], v = nodeMap[e.target];
@@ -1160,28 +1110,41 @@ G = spark_dsg.DynamicSceneGraph.load("smart_lab_dsg.json")
         const p1 = GRAPH_POS[u.id], p2 = GRAPH_POS[v.id];
         if (!p1 || !p2) continue;
 
-        const isMount = (u.layer === 3 && v.layer === 2) || (u.layer === 2 && v.layer === 3);
+        const lowL = Math.min(u.layer, v.layer);
+        const highL = Math.max(u.layer, v.layer);
+        const isSegAgg = lowL === 1 && highL === 2;
+        const isMount = lowL === 2 && highL === 3;
+        const isHier = lowL >= 3;
+
+        if (isSegAgg && !state.edgeSeg) continue;
         if (isMount && !state.edgeMount) continue;
-        if (!isMount && !state.edgeHier) continue;
+        if (isHier && !state.edgeHier) continue;
 
         const pk = pairKey(u.id, v.id);
         const isHot = focus && focus.edges.has(pk);
         const isPlanMount = planSets.mountEdges.has(pk);
         const dim = focus && !isHot && !isPlanMount;
 
-        // Smooth vertical Bezier curve (strictly top-down!)
         const topP = p1.y < p2.y ? p1 : p2;
         const botP = p1.y < p2.y ? p2 : p1;
         const midY = (topP.y + botP.y) / 2;
-        const dPath = `M ${topP.x} ${topP.y + 12} C ${topP.x} ${midY}, ${botP.x} ${midY}, ${botP.x} ${botP.y - 12}`;
+        const dPath = `M ${topP.x} ${topP.y + 11} C ${topP.x} ${midY}, ${botP.x} ${midY}, ${botP.x} ${botP.y - 10}`;
+
+        const strokeCol = isPlanMount
+          ? "#34d399"
+          : isHot
+          ? "#fde047"
+          : isSegAgg
+          ? "rgba(45, 212, 191, 0.45)"
+          : isMount
+          ? "rgba(251, 191, 36, 0.48)"
+          : "rgba(167, 139, 250, 0.32)";
 
         const path = svgEl("path", {
-          d: dPath,
-          fill: "none",
-          stroke: isPlanMount ? "#34d399" : isHot ? "#fde047" : isMount ? "rgba(251,191,36,0.52)" : "rgba(167,139,250,0.34)",
-          "stroke-width": isPlanMount ? 2.8 : isHot ? 2.6 : 1.3,
-          "stroke-dasharray": isMount ? "2 3.5" : "5 4",
-          opacity: dim ? 0.10 : 1,
+          d: dPath, fill: "none", stroke: strokeCol,
+          "stroke-width": isPlanMount ? 2.6 : isHot ? 2.4 : 1.2,
+          "stroke-dasharray": isHier ? "5 4" : "2 3",
+          opacity: dim ? 0.09 : 1,
           class: "interactive-edge",
         });
         attachEdgeEvents(path, pk, e);
@@ -1189,7 +1152,7 @@ G = spark_dsg.DynamicSceneGraph.load("smart_lab_dsg.json")
       }
       svg.appendChild(vEdgeG);
 
-      // 3. HORIZONTAL INTRA-LAYER EDGES (Topological Connectivity: Room<->Room & Place<->Place)
+      // 3. HORIZONTAL INTRA-LAYER EDGES (L4 Rooms, L3 Places, L1 Segments geometric adjacency!)
       const hEdgeG = svgEl("g");
       for (const e of graphData.intra_edges) {
         const u = nodeMap[e.source], v = nodeMap[e.target];
@@ -1199,6 +1162,7 @@ G = spark_dsg.DynamicSceneGraph.load("smart_lab_dsg.json")
 
         if (e.layer === 4 && !state.edgeL4) continue;
         if (e.layer === 3 && !state.edgeL3) continue;
+        if (e.layer === 1 && !state.edgeSeg) continue;
 
         const pk = pairKey(u.id, v.id);
         const isHot = focus && focus.edges.has(pk);
@@ -1207,38 +1171,32 @@ G = spark_dsg.DynamicSceneGraph.load("smart_lab_dsg.json")
           const isPlanEdge = planSets.roomEdges.has(pk);
           const dim = focus && !isHot && !isPlanEdge;
           const dist = Math.abs(p1.x - p2.x);
-          // Adjacent columns connect straight horizontally; non-adjacent sweep cleanly overhead!
-          let dPath, midX = (p1.x + p2.x) / 2, midY = p1.y;
+          const midX = (p1.x + p2.x) / 2;
+          let dPath, midY = p1.y;
           if (dist < 165) {
             dPath = `M ${p1.x} ${p1.y} L ${p2.x} ${p2.y}`;
           } else {
-            const lift = dist > 260 ? 52 : 36;
+            const lift = dist > 260 ? 44 : 30;
             const ctrlY = p1.y - lift;
-            dPath = `M ${p1.x} ${p1.y - 14} Q ${midX} ${ctrlY - 12} ${p2.x} ${p2.y - 14}`;
-            midY = (p1.y - 14 + ctrlY - 12) / 2;
+            dPath = `M ${p1.x} ${p1.y - 13} Q ${midX} ${ctrlY - 12} ${p2.x} ${p2.y - 13}`;
+            midY = (p1.y - 13 + ctrlY - 12) / 2;
           }
           const path = svgEl("path", {
             d: dPath, fill: "none",
             stroke: isPlanEdge ? "#f472b6" : isHot ? "#fde047" : "#c084fc",
-            "stroke-width": isPlanEdge ? 4.4 : isHot ? 4.0 : 2.8,
+            "stroke-width": isPlanEdge ? 4.2 : isHot ? 3.8 : 2.6,
             opacity: dim ? 0.14 : 1,
             class: "interactive-edge",
           });
           attachEdgeEvents(path, pk, e);
           hEdgeG.appendChild(path);
 
-          // Tiny doorway badge cleanly lifted above adjacent horizontal links so it never clips behind Room cards!
           if (isHot || isPlanEdge) {
             const door = doorByRoomPair[pk];
             if (door) {
               const by = dist < 165 ? midY - 14 : midY;
-              hEdgeG.appendChild(svgEl("rect", {
-                x: midX - 24, y: by - 8, width: 48, height: 15, rx: 4,
-                fill: isPlanEdge ? "#9d174d" : "#4c1d95",
-              }));
-              hEdgeG.appendChild(svgEl("text", {
-                x: midX, y: by + 2.5, fill: "#fff", "font-size": 8.8, "font-weight": 700, "text-anchor": "middle",
-              }, "🔓 门通"));
+              hEdgeG.appendChild(svgEl("rect", { x: midX - 22, y: by - 7.5, width: 44, height: 14, rx: 4, fill: isPlanEdge ? "#9d174d" : "#4c1d95" }));
+              hEdgeG.appendChild(svgEl("text", { x: midX, y: by + 2.5, fill: "#fff", "font-size": 8.5, "font-weight": 700, "text-anchor": "middle" }, "🔓门通"));
             }
           }
         } else if (e.layer === 3) {
@@ -1248,144 +1206,111 @@ G = spark_dsg.DynamicSceneGraph.load("smart_lab_dsg.json")
           const dist = Math.abs(p1.x - p2.x);
           const midX = (p1.x + p2.x) / 2;
           let dPath, midY = p1.y;
-
           if (isDoor) {
-            // Doorway bridges arc cleanly ABOVE the Place row in bright emerald!
-            const lift = Math.min(72, 22 + dist * 0.22);
-            dPath = `M ${p1.x} ${p1.y - 9} Q ${midX} ${p1.y - lift} ${p2.x} ${p2.y - 9}`;
+            const lift = Math.min(62, 20 + dist * 0.2);
+            dPath = `M ${p1.x} ${p1.y - 8} Q ${midX} ${p1.y - lift} ${p2.x} ${p2.y - 8}`;
             midY = p1.y - lift * 0.56;
           } else if (dist <= 45) {
             dPath = `M ${p1.x} ${p1.y} L ${p2.x} ${p2.y}`;
           } else {
-            // Intra-room skip edge arcs neatly BELOW the Place row
-            dPath = `M ${p1.x} ${p1.y + 9} Q ${midX} ${p1.y + 34} ${p2.x} ${p2.y + 9}`;
-            midY = p1.y + 22;
+            dPath = `M ${p1.x} ${p1.y + 8} Q ${midX} ${p1.y + 28} ${p2.x} ${p2.y + 8}`;
+            midY = p1.y + 18;
           }
-
           const path = svgEl("path", {
             d: dPath, fill: "none",
             stroke: isPlanEdge ? "#34d399" : isHot ? "#fde047" : isDoor ? "#34d399" : "rgba(34,211,238,0.62)",
-            "stroke-width": isPlanEdge ? 3.8 : isHot ? 3.2 : isDoor ? 2.2 : 1.6,
+            "stroke-width": isPlanEdge ? 3.6 : isHot ? 3.0 : isDoor ? 2.1 : 1.5,
             opacity: dim ? 0.12 : 1,
             class: "interactive-edge",
           });
           attachEdgeEvents(path, pk, e);
           hEdgeG.appendChild(path);
-
-          if (isHot) {
-            hEdgeG.appendChild(svgEl("rect", {
-              x: midX - 18, y: midY - 8, width: 36, height: 14, rx: 4, fill: "#0e7490",
-            }));
-            hEdgeG.appendChild(svgEl("text", {
-              x: midX, y: midY + 2, fill: "#fff", "font-size": 9, "font-weight": 700, "text-anchor": "middle",
-            }, `${e.weight}m`));
-          }
+        } else if (e.layer === 1) {
+          // L1 Segment geometric adjacency edges (short horizontal teal lines!)
+          const dim = focus && !isHot;
+          const dist = Math.abs(p1.x - p2.x);
+          const midX = (p1.x + p2.x) / 2;
+          const dPath = dist <= 40
+            ? `M ${p1.x} ${p1.y} L ${p2.x} ${p2.y}`
+            : `M ${p1.x} ${p1.y + 9} Q ${midX} ${p1.y + 22} ${p2.x} ${p2.y + 9}`;
+          const path = svgEl("path", {
+            d: dPath, fill: "none",
+            stroke: isHot ? "#fde047" : "#2dd4bf",
+            "stroke-width": isHot ? 2.6 : 1.5,
+            opacity: dim ? 0.14 : 0.85,
+            class: "interactive-edge",
+          });
+          attachEdgeEvents(path, pk, e);
+          hEdgeG.appendChild(path);
         }
       }
 
-      // Show closed doors as explicit red "✕ 已断开" markers on L4 so user SEES edge removal!
+      // Closed doors on L4 (lifted cleanly above adjacent links so zero clipping!)
       if (state.edgeL4) {
         for (const d of graphData.doors) {
           if (d.open) continue;
-          const p1 = GRAPH_POS[`R(${d.rooms[0]})`];
-          const p2 = GRAPH_POS[`R(${d.rooms[1]})`];
+          const p1 = GRAPH_POS[`R(${d.rooms[0]})`], p2 = GRAPH_POS[`R(${d.rooms[1]})`];
           if (!p1 || !p2) continue;
           const dist = Math.abs(p1.x - p2.x);
           const midX = (p1.x + p2.x) / 2;
-          const ctrlY = dist < 165 ? p1.y : p1.y - (dist > 260 ? 52 : 36);
+          const lift = dist > 260 ? 44 : 30;
           const dPath = dist < 165
             ? `M ${p1.x} ${p1.y} L ${p2.x} ${p2.y}`
-            : `M ${p1.x} ${p1.y - 14} Q ${midX} ${ctrlY - 12} ${p2.x} ${p2.y - 14}`;
-          const labelY = dist < 165 ? p1.y : (p1.y - 14 + ctrlY - 12) / 2;
+            : `M ${p1.x} ${p1.y - 13} Q ${midX} ${p1.y - lift - 12} ${p2.x} ${p2.y - 13}`;
+          const labelY = dist < 165 ? p1.y - 14 : (p1.y - 13 + p1.y - lift - 12) / 2;
 
-          hEdgeG.appendChild(svgEl("path", {
-            d: dPath, fill: "none", stroke: "rgba(251,113,133,0.45)",
-            "stroke-width": 2, "stroke-dasharray": "4 4",
-          }));
-          hEdgeG.appendChild(svgEl("rect", {
-            x: midX - 24, y: labelY - 8, width: 48, height: 16, rx: 4,
-            fill: "#881337", stroke: "#fb7185", "stroke-width": 1,
-          }));
-          hEdgeG.appendChild(svgEl("text", {
-            x: midX, y: labelY + 3, fill: "#ffe4e6", "font-size": 9, "font-weight": 700, "text-anchor": "middle",
-          }, "🔒 已断开"));
+          hEdgeG.appendChild(svgEl("path", { d: dPath, fill: "none", stroke: "rgba(251,113,133,0.45)", "stroke-width": 2, "stroke-dasharray": "4 4" }));
+          hEdgeG.appendChild(svgEl("rect", { x: midX - 22, y: labelY - 7.5, width: 44, height: 15, rx: 4, fill: "#881337", stroke: "#fb7185", "stroke-width": 1 }));
+          hEdgeG.appendChild(svgEl("text", { x: midX, y: labelY + 2.8, fill: "#ffe4e6", "font-size": 8.5, "font-weight": 700, "text-anchor": "middle" }, "🔒断开"));
         }
       }
       svg.appendChild(hEdgeG);
 
-      // 4. NODES (L5, L4, L3, L2)
+      // 4. NODES (L5 -> L1)
       const nodesG = svgEl("g");
       for (const n of graphData.nodes) {
         const pos = GRAPH_POS[n.id];
         if (!pos) continue;
 
         const isHot = focus && focus.nodes.has(n.id);
-        const isSel = selectedNodeId === n.id;
-        const inPlan =
-          activePlan &&
-          (activePlan.start.id === n.id ||
-            activePlan.goal.id === n.id ||
-            activePlan.place_path.includes(n.id) ||
-            activePlan.room_path.some((r) => r.id === n.id));
+        const inPlan = activePlan && (
+          activePlan.start.id === n.id || activePlan.goal.id === n.id ||
+          activePlan.place_path.includes(n.id) || activePlan.room_path.some((r) => r.id === n.id)
+        );
         const dim = focus && !isHot && !inPlan;
 
-        const g = svgEl("g", { class: "interactive-node", opacity: dim ? 0.25 : 1 });
+        const g = svgEl("g", { class: "interactive-node", opacity: dim ? 0.22 : 1 });
 
         if (n.layer === 5) {
-          g.appendChild(svgEl("rect", {
-            x: pos.x - 98, y: pos.y - 17, width: 196, height: 34, rx: 10,
-            fill: "#1e293b", stroke: isHot ? "#fde047" : "#e2e8f0", "stroke-width": isHot ? 2.6 : 1.6,
-          }));
-          g.appendChild(svgEl("text", {
-            x: pos.x, y: pos.y + 4.5, fill: "#f8fafc", "font-size": 12.5, "font-weight": 700, "text-anchor": "middle",
-          }, `🏛️ ${n.id} ${n.name_zh}`));
+          g.appendChild(svgEl("rect", { x: pos.x - 94, y: pos.y - 14, width: 188, height: 28, rx: 9, fill: "#1e293b", stroke: isHot ? "#fde047" : "#e2e8f0", "stroke-width": isHot ? 2.4 : 1.5 }));
+          g.appendChild(svgEl("text", { x: pos.x, y: pos.y + 4, fill: "#f8fafc", "font-size": 11.8, "font-weight": 700, "text-anchor": "middle" }, `🏛️ ${n.id} ${n.name_zh}`));
         } else if (n.layer === 4) {
-          g.appendChild(svgEl("rect", {
-            x: pos.x - 52, y: pos.y - 18, width: 104, height: 36, rx: 9,
-            fill: "#162036",
-            stroke: isHot ? "#fde047" : inPlan ? "#f472b6" : n.color,
-            "stroke-width": isHot || inPlan ? 2.8 : 1.8,
-          }));
-          g.appendChild(svgEl("text", {
-            x: pos.x, y: pos.y - 1, fill: "#f8fafc", "font-size": 11.5, "font-weight": 700, "text-anchor": "middle",
-          }, `${ROOM_ICONS[n.id] || ""} ${n.name_zh}`));
-          g.appendChild(svgEl("text", {
-            x: pos.x, y: pos.y + 12, fill: "#94a3b8", "font-size": 9.5, "text-anchor": "middle",
-            "font-family": "ui-monospace, monospace",
-          }, n.id));
+          g.appendChild(svgEl("rect", { x: pos.x - 50, y: pos.y - 16, width: 100, height: 32, rx: 8, fill: "#162036", stroke: isHot ? "#fde047" : inPlan ? "#f472b6" : n.color, "stroke-width": isHot || inPlan ? 2.6 : 1.7 }));
+          g.appendChild(svgEl("text", { x: pos.x, y: pos.y - 1, fill: "#f8fafc", "font-size": 11, "font-weight": 700, "text-anchor": "middle" }, `${ROOM_ICONS[n.id] || ""} ${n.name_zh}`));
+          g.appendChild(svgEl("text", { x: pos.x, y: pos.y + 11, fill: "#94a3b8", "font-size": 9, "text-anchor": "middle", "font-family": "ui-monospace, monospace" }, n.id));
         } else if (n.layer === 3) {
-          g.appendChild(svgEl("circle", {
-            cx: pos.x, cy: pos.y, r: isHot || inPlan ? 12.5 : 10.5,
-            fill: inPlan ? "#065f46" : "#0e293d",
-            stroke: isHot ? "#fde047" : inPlan ? "#34d399" : "#22d3ee",
-            "stroke-width": isHot || inPlan ? 2.4 : 1.6,
-          }));
-          g.appendChild(svgEl("text", {
-            x: pos.x, y: pos.y + 3.2, fill: "#e0f2fe", "font-size": 8.8, "font-weight": 700,
-            "text-anchor": "middle", "font-family": "ui-monospace, monospace",
-          }, n.id.replace("(", "").replace(")", "")));
+          g.appendChild(svgEl("circle", { cx: pos.x, cy: pos.y, r: isHot || inPlan ? 11.5 : 9.8, fill: inPlan ? "#065f46" : "#0e293d", stroke: isHot ? "#fde047" : inPlan ? "#34d399" : "#22d3ee", "stroke-width": isHot || inPlan ? 2.2 : 1.5 }));
+          g.appendChild(svgEl("text", { x: pos.x, y: pos.y + 3, fill: "#e0f2fe", "font-size": 8.4, "font-weight": 700, "text-anchor": "middle", "font-family": "ui-monospace, monospace" }, n.id.replace("(", "").replace(")", "")));
         } else if (n.layer === 2) {
           const isEndpoint = activePlan && (activePlan.start.id === n.id || activePlan.goal.id === n.id);
-          g.appendChild(svgEl("rect", {
-            x: pos.x - 27, y: pos.y - 16, width: 54, height: 32, rx: 7,
-            fill: "#0f172a",
-            stroke: isHot ? "#fde047" : isEndpoint ? "#34d399" : n.color,
-            "stroke-width": isHot || isEndpoint ? 2.4 : 1.4,
-          }));
-          g.appendChild(svgEl("text", {
-            x: pos.x, y: pos.y - 1, "font-size": 12.5, "text-anchor": "middle",
-          }, OBJECT_ICONS[n.id] || "📦"));
+          g.appendChild(svgEl("rect", { x: pos.x - 25, y: pos.y - 14, width: 50, height: 28, rx: 6, fill: "#0f172a", stroke: isHot ? "#fde047" : isEndpoint ? "#34d399" : n.color, "stroke-width": isHot || isEndpoint ? 2.3 : 1.4 }));
+          g.appendChild(svgEl("text", { x: pos.x, y: pos.y - 1, "font-size": 11.5, "text-anchor": "middle" }, OBJECT_ICONS[n.id] || "📦"));
           const shortName = n.name_zh.length > 4 ? n.name_zh.slice(0, 3) : n.name_zh;
-          g.appendChild(svgEl("text", {
-            x: pos.x, y: pos.y + 12, fill: isHot ? "#fde047" : "#cbd5e1",
-            "font-size": 9, "font-weight": 600, "text-anchor": "middle",
-          }, shortName));
-        }
-
-        if (isSel) {
-          g.appendChild(svgEl("circle", {
-            cx: pos.x, cy: pos.y, r: 4, fill: "#fde047", opacity: 0.0,
+          g.appendChild(svgEl("text", { x: pos.x, y: pos.y + 10.5, fill: isHot ? "#fde047" : "#cbd5e1", "font-size": 8.6, "font-weight": 600, "text-anchor": "middle" }, shortName));
+        } else if (n.layer === 1) {
+          // Crisp compact L1 Segment pill (s0..s27)
+          const isExact = focus && focus.focusId === n.id;
+          g.appendChild(svgEl("rect", {
+            x: pos.x - 15, y: pos.y - 9.5, width: 30, height: 19, rx: 5,
+            fill: isExact ? "#fde047" : isHot ? "#134e4a" : "#0b1e28",
+            stroke: isHot ? "#fde047" : n.color,
+            "stroke-width": isHot ? 2.0 : 1.2,
           }));
+          g.appendChild(svgEl("text", {
+            x: pos.x, y: pos.y + 3.2,
+            fill: isExact ? "#0f172a" : "#ccfbf1",
+            "font-size": 8.4, "font-weight": 700, "text-anchor": "middle", "font-family": "ui-monospace, monospace",
+          }, n.id.replace("(", "").replace(")", "")));
         }
 
         attachNodeEvents(g, n.id);
@@ -1394,7 +1319,7 @@ G = spark_dsg.DynamicSceneGraph.load("smart_lab_dsg.json")
       svg.appendChild(nodesG);
     }
 
-    // ============== Unified Interactive Events (Bidirectional Linkage without Click Teardown!) ==============
+    // ============== Opposite-SVG Hover + Delegated Click ==============
     function attachNodeEvents(el, nodeId) {
       el.setAttribute("data-node-id", nodeId);
       el.addEventListener("mouseenter", () => {
@@ -1402,7 +1327,6 @@ G = spark_dsg.DynamicSceneGraph.load("smart_lab_dsg.json")
         hoveredNodeId = nodeId;
         hoveredEdgeKey = null;
         inspectNode(nodeMap[nodeId]);
-        // Only re-render the OPPOSITE SVG on hover so the clicked element never gets destroyed mid-click!
         const inMap = el.ownerSVGElement && el.ownerSVGElement.id === "mapSvg";
         if (inMap) renderSceneGraph();
         else renderFloorplan();
@@ -1442,11 +1366,11 @@ G = spark_dsg.DynamicSceneGraph.load("smart_lab_dsg.json")
       renderSceneGraph();
     }
 
-    // ============== Inspector & Dock Renderers ==============
+    // ============== Inspector & Dock ==============
     function updateHeaderStats() {
       const s = graphData.stats;
       document.getElementById("graphStatsText").textContent =
-        `(${s.total_nodes} 节点 · ${s.intra_edges} 条横向拓扑边 · ${s.inter_edges} 条纵向归属边)`;
+        `(${s.total_nodes} 节点: L5=1, L4=5, L3=17, L2=14, L1=${s.layers.SEGMENTS || 0} · ${s.intra_edges} 横向边 · ${s.inter_edges} 纵向边)`;
     }
 
     function populateSelects() {
@@ -1455,16 +1379,14 @@ G = spark_dsg.DynamicSceneGraph.load("smart_lab_dsg.json")
       if (startSel.options.length > 0) return;
 
       const objects = graphData.nodes.filter((n) => n.layer === 2);
-      const rooms = graphData.nodes.filter((n) => n.layer === 4);
+      const segs = graphData.nodes.filter((n) => n.layer === 1);
       let html = `<optgroup label="物体 (L2 Objects)">`;
       for (const o of objects) {
-        const rSym = nodeMap[o.parent]?.parent;
-        const rZh = rSym && nodeMap[rSym] ? nodeMap[rSym].name_zh : "";
-        html += `<option value="${o.id}">${OBJECT_ICONS[o.id] || ""} ${o.name_zh} ${o.id} [${rZh}]</option>`;
+        html += `<option value="${o.id}">${OBJECT_ICONS[o.id] || ""} ${o.name_zh} ${o.id}</option>`;
       }
-      html += `</optgroup><optgroup label="空间概念 (L4 Rooms)">`;
-      for (const r of rooms) {
-        html += `<option value="${r.id}">${ROOM_ICONS[r.id] || ""} ${r.name_zh} ${r.id}</option>`;
+      html += `</optgroup><optgroup label="几何片段 (L1 Segments)">`;
+      for (const s of segs) {
+        html += `<option value="${s.id}">▲ ${s.id} ${s.name_zh}</option>`;
       }
       html += `</optgroup>`;
       startSel.innerHTML = html;
@@ -1475,36 +1397,57 @@ G = spark_dsg.DynamicSceneGraph.load("smart_lab_dsg.json")
 
     function renderPlanDock(p) {
       const isDanger = !p.reachable || (p.straight_line_blocked && p.detour_ratio >= 2.0);
-      const roomSeq = p.room_path.length ? p.room_path.map((r) => `${r.name_zh}(${r.id})`).join(" → ") : "无连通房间路径";
+      const roomSeq = p.room_path.length ? p.room_path.map((r) => `${r.name_zh}(${r.id})`).join(" → ") : "无连通路径";
       document.getElementById("planDockContent").innerHTML = `
         <div class="plan-banner ${isDanger ? "danger" : ""}">${p.summary}</div>
         <div class="metric-strip">
-          <span class="m-pill ${p.straight_line_blocked ? "warn" : ""}">欧氏直线：<strong>${p.euclidean_distance}m</strong> (${p.straight_line_blocked ? "被挡" : "直通"})</span>
-          <span class="m-pill ${p.reachable ? "good" : "warn"}">真实拓扑：<strong>${p.reachable ? p.topological_distance + "m" : "不可达"}</strong></span>
+          <span class="m-pill ${p.straight_line_blocked ? "warn" : ""}">直线：<strong>${p.euclidean_distance}m</strong> (${p.straight_line_blocked ? "被挡" : "直通"})</span>
+          <span class="m-pill ${p.reachable ? "good" : "warn"}">拓扑：<strong>${p.reachable ? p.topological_distance + "m" : "不可达"}</strong></span>
           <span class="m-pill ${p.detour_ratio >= 2 ? "warn" : ""}">绕行：<strong>${p.reachable ? p.detour_ratio + "x" : "断开"}</strong></span>
-          <span class="m-pill">L4 房间序：<strong>${roomSeq}</strong></span>
+          <span class="m-pill">房间序：<strong>${roomSeq}</strong></span>
         </div>
       `;
     }
 
     function inspectNode(n) {
       if (!n) return;
-      document.getElementById("inspTitle").textContent = `🧬 节点联动：${OBJECT_ICONS[n.id] || ROOM_ICONS[n.id] || "🔵"} ${n.id} ${n.name_zh} · L${n.layer} (${n.layer_name})`;
+      const icon = n.layer === 1 ? "▲" : OBJECT_ICONS[n.id] || ROOM_ICONS[n.id] || "🔵";
+      document.getElementById("inspTitle").textContent = `🧬 5层联动：${icon} ${n.id} ${n.name_zh} · L${n.layer} (${n.layer_name})`;
       const parentStr = n.parent && nodeMap[n.parent] ? `${n.parent} ${nodeMap[n.parent].name_zh}` : "无（根节点）";
-      const childStr = n.children.length ? n.children.slice(0, 6).map((c) => `${c}`).join(", ") : "无";
-      const sibStr = n.siblings.length ? n.siblings.map((s) => `${s} ${nodeMap[s]?.name_zh || ""}`).join("、") : "无横向拓扑邻居";
+      const childStr = n.children.length
+        ? n.children.slice(0, 5).map((c) => `${c} ${nodeMap[c]?.name_zh || ""}`).join("、")
+        : "无（底层直接索引 G.mesh）";
+      const sibStr = n.siblings.length ? n.siblings.map((s) => `${s} ${nodeMap[s]?.name_zh || ""}`).join("、") : "无横向边";
+
+      let extra = "";
+      if (n.layer === 1) {
+        extra = `<br/><strong>▲ G.mesh 顶点索引：</strong><code>mesh_connections=${JSON.stringify(n.mesh_connections)}</code> · 聚类相似度 <code>${n.cluster_sim}</code>`;
+      } else if (n.distance) {
+        extra = ` · <strong>ESDF半径：</strong><code>${n.distance}m</code>`;
+      }
 
       document.getElementById("inspMeta").innerHTML = `
-        <strong>坐标：</strong><code>[${n.position.join(", ")}]m</code>${n.distance ? ` · <strong>ESDF半径：</strong><code>${n.distance}m</code>` : ""}<br/>
+        <strong>坐标：</strong><code>[${n.position.join(", ")}]m</code>${extra}<br/>
         <strong>↑ 父节点 (纵向归属)：</strong>${parentStr}<br/>
         <strong>↓ 子节点 (纵向包含)：</strong>${childStr}<br/>
-        <strong>←→ 拓扑邻居 (横向连通)：</strong>${sibStr}
+        <strong>←→ 同层邻居：</strong>${sibStr}
       `;
-      document.getElementById("inspCode").textContent =
-        `node = G.get_node(NodeSymbol('${n.id[0]}', ${n.id.slice(2, -1)}).value)\n` +
-        `# layer=${n.layer} (${n.layer_name})\n` +
-        `node.get_parent()  # -> ${n.parent || "None"}\n` +
-        `node.siblings()    # -> ${JSON.stringify(n.siblings)}`;
+
+      if (n.layer === 1) {
+        document.getElementById("inspCode").textContent =
+          `seg = G.get_node(NodeSymbol('s', ${n.id.slice(2, -1)}).value)\n` +
+          `# layer=1 (DsgLayers.SEGMENTS)\n` +
+          `seg.attributes.mesh_connections  # -> ${JSON.stringify(n.mesh_connections)}\n` +
+          `seg.get_parent()                 # -> ${n.parent} (聚类归属到 L2 Object)\n` +
+          `seg.siblings()                   # -> ${JSON.stringify(n.siblings)} (几何邻接碎片)`;
+      } else {
+        document.getElementById("inspCode").textContent =
+          `node = G.get_node(NodeSymbol('${n.id[0]}', ${n.id.slice(2, -1)}).value)\n` +
+          `# layer=${n.layer} (${n.layer_name})\n` +
+          `node.get_parent()  # -> ${n.parent || "None"}\n` +
+          `node.children()    # -> ${JSON.stringify(n.children)}\n` +
+          `node.siblings()    # -> ${JSON.stringify(n.siblings)}`;
+      }
     }
 
     function inspectEdge(pk, e) {
@@ -1512,12 +1455,25 @@ G = spark_dsg.DynamicSceneGraph.load("smart_lab_dsg.json")
       const na = nodeMap[a], nb = nodeMap[b];
       const isIntra = e.kind === "intra";
       const door = doorByPlacePair[pk] || doorByRoomPair[pk];
-      document.getElementById("inspTitle").textContent = isIntra
+      const isSegIntra = isIntra && e.layer === 1;
+      const isSegAgg = !isIntra && (na?.layer === 1 || nb?.layer === 1);
+
+      document.getElementById("inspTitle").textContent = isSegIntra
+        ? `↔ L1 片段几何邻接边：${a} ${na?.name_zh || ""} ↔ ${b} ${nb?.name_zh || ""}`
+        : isSegAgg
+        ? `↕ L2←L1 片段聚合边：${a} ${na?.name_zh || ""} — ${b} ${nb?.name_zh || ""}`
+        : isIntra
         ? `↔ 横向拓扑连通边：${a} ${na?.name_zh || ""} ↔ ${b} ${nb?.name_zh || ""}`
         : `↕ 纵向层间从属边：${a} ${na?.name_zh || ""} → ${b} ${nb?.name_zh || ""}`;
-      document.getElementById("inspMeta").innerHTML = isIntra
-        ? `<strong>类型：</strong>层内拓扑连通边（L${e.layer} Intra-layer Edge）<br/><strong>物理含义：</strong>两区域之间存在无障碍通道${door ? `（经过 <strong>${door.name_zh}</strong>，可直接点击左侧地图门洞开关）` : ""}。<br/><strong>路径权重：</strong><code>${e.weight} m</code>`
-        : `<strong>类型：</strong>层间从属关系边（Inter-layer Edge）<br/><strong>物理含义：</strong>编码“物体 属于 自由空间 属于 房间 属于 大楼”的层次抽象，不是机器人行走路径。`;
+
+      document.getElementById("inspMeta").innerHTML = isSegIntra
+        ? `<strong>类型：</strong>L1 几何片段邻接边（SEGMENTS Intra-layer）<br/><strong>含义：</strong>两块 3D Mesh 片段在物理空间中紧邻接触，是聚类合并为同一个 L2 Object 的几何依据。`
+        : isSegAgg
+        ? `<strong>类型：</strong>片段→物体聚合边（L1→L2 Inter-layer）<br/><strong>含义：</strong>多个过分割碎片（如座垫+靠背+扶手）经空间邻接与语义特征相似度聚合成单个 L2 物体。`
+        : isIntra
+        ? `<strong>类型：</strong>L${e.layer} 层内拓扑连通边<br/><strong>含义：</strong>两区域存在无碰撞通道${door ? `（经过 <strong>${door.name_zh}</strong>）` : ""}，权重 <code>${e.weight}m</code>。`
+        : `<strong>类型：</strong>层间从属关系边<br/><strong>含义：</strong>编码层次化空间抽象包含关系。`;
+
       document.getElementById("inspCode").textContent =
         `edge = G.get_edge(NodeSymbol('${a[0]}', ${a.slice(2, -1)}).value, NodeSymbol('${b[0]}', ${b.slice(2, -1)}).value)\n` +
         `# kind=${e.kind}${e.weight ? `, weight=${e.weight}m` : ""}`;
@@ -1528,10 +1484,33 @@ G = spark_dsg.DynamicSceneGraph.load("smart_lab_dsg.json")
       document.getElementById("inspCode").textContent = code;
     }
 
-    // ============== Controls & Presets ==============
+    // ============== Experiments & Controls ==============
     function setActiveExp(btn) {
       document.querySelectorAll(".exp-btn").forEach((b) => b.classList.remove("active"));
       if (btn) btn.classList.add("active");
+    }
+
+    function runSegmentDemo(btn) {
+      setActiveExp(btn);
+      activePlan = null;
+      robotAnim.playing = false;
+      state.showMapSegs = true;
+      document.getElementById("chipMapSegs").classList.add("active");
+
+      const targetObjId = DEMO_CLUSTER_OBJECTS[clusterCycleIdx % DEMO_CLUSTER_OBJECTS.length];
+      clusterCycleIdx += 1;
+      selectedNodeId = targetObjId;
+      const obj = nodeMap[targetObjId];
+      const segNames = obj.children.map((sid) => `${sid} ${nodeMap[sid]?.name_zh || ""}`).join(" + ");
+
+      document.getElementById("planDockContent").innerHTML = `
+        <div class="plan-banner teal">
+          🧩 <strong>L1 SEGMENTS → L2 OBJECT 聚类演示（再次点击切换沙发/双人床/笔记本）：</strong><br/>
+          左图已高亮 <strong>${OBJECT_ICONS[targetObjId]} ${obj.name_zh} ${targetObjId}</strong> 下方的 <strong>${obj.children.length} 块三角网格碎片</strong>（${segNames}）。右图同步展示完整 5 层归属链：<code>B(0) ↓ Room ↓ Place ↓ ${targetObjId} ↓ {${obj.children.join(", ")}}</code>！
+        </div>
+      `;
+      inspectNode(obj);
+      renderAll();
     }
 
     function runPreset(name, btn) {
@@ -1544,6 +1523,7 @@ G = spark_dsg.DynamicSceneGraph.load("smart_lab_dsg.json")
 
     function runCustomPlan() {
       setActiveExp(null);
+      selectedNodeId = null;
       runPlan(document.getElementById("startSelect").value, document.getElementById("goalSelect").value, true);
     }
 
@@ -1553,7 +1533,7 @@ G = spark_dsg.DynamicSceneGraph.load("smart_lab_dsg.json")
       selectedNodeId = null;
       robotAnim.playing = false;
       document.getElementById("planDockContent").innerHTML = `
-        <div class="plan-banner">已清除路径规划。现在可以自由悬停/点击左右两侧任意节点，或直接点击左图中的 <strong>🔓 门洞</strong> 观察右图拓扑边实时断开与重连。</div>
+        <div class="plan-banner">已切换到 5 层全览视图。悬停任意 <strong>L1 片段 s(k)</strong> 可看它对应左图哪一块三角网格，或直接点击左图墙上的 <strong>🔓开</strong> 门洞测试动态拓扑！</div>
       `;
       renderAll();
     }
@@ -1569,6 +1549,12 @@ G = spark_dsg.DynamicSceneGraph.load("smart_lab_dsg.json")
       if (!activePlan || !activePlan.reachable) return;
       robotAnim.progress = 0;
       robotAnim.playing = true;
+    }
+
+    function toggleMapSegs(btn) {
+      state.showMapSegs = !state.showMapSegs;
+      btn.classList.toggle("active", state.showMapSegs);
+      renderFloorplan();
     }
 
     function toggleMapPlaces(btn) {
@@ -1595,15 +1581,12 @@ G = spark_dsg.DynamicSceneGraph.load("smart_lab_dsg.json")
       document.getElementById("modalJson").textContent = JSON.stringify(data, null, 2);
     }
 
-    function closeRepoModal() {
-      document.getElementById("repoModal").classList.remove("open");
-    }
+    function closeRepoModal() { document.getElementById("repoModal").classList.remove("open"); }
 
     function escapeHtml(s) {
       return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     }
 
-    // ============== Smooth Robot Animation Loop ==============
     function updateRobotPosition() {
       if (!robotSvgDot || !activePlan || !activePlan.reachable || activePlan.waypoints.length < 2) return;
       const wps = activePlan.waypoints;
@@ -1637,22 +1620,16 @@ G = spark_dsg.DynamicSceneGraph.load("smart_lab_dsg.json")
       lastT = now;
       if (robotAnim.playing) {
         robotAnim.progress += dt * robotAnim.speed;
-        if (robotAnim.progress >= 1.0) {
-          robotAnim.progress = 1.0;
-          robotAnim.playing = false;
-        }
+        if (robotAnim.progress >= 1.0) { robotAnim.progress = 1.0; robotAnim.playing = false; }
         updateRobotPosition();
       }
       requestAnimationFrame(animTick);
     }
 
-    // Rock-solid delegated click handlers on both SVGs (doors take top priority!)
+    // Delegated click handlers (doors take priority!)
     document.getElementById("mapSvg").addEventListener("click", (ev) => {
       const doorEl = ev.target.closest("[data-door-id]");
-      if (doorEl) {
-        toggleDoor(doorEl.getAttribute("data-door-id"));
-        return;
-      }
+      if (doorEl) { toggleDoor(doorEl.getAttribute("data-door-id")); return; }
       const nodeEl = ev.target.closest("[data-node-id]");
       if (nodeEl) {
         const nid = nodeEl.getAttribute("data-node-id");
@@ -1676,10 +1653,10 @@ G = spark_dsg.DynamicSceneGraph.load("smart_lab_dsg.json")
       clearSelection();
     });
 
-    // ============== Boot ==============
     async function init() {
       await fetchGraph();
-      await runPlan("O(8)", "O(11)", true);
+      // Start right on Experiment 1: L1 SEGMENTS -> L2 OBJECT Clustering Demo (Sofa O(0) <- s(0), s(1), s(2))!
+      runSegmentDemo(document.getElementById("btnExpSeg"));
       requestAnimationFrame(animTick);
     }
 
